@@ -1,4 +1,23 @@
 #include <iostream>
+#include <exception>
+
+size_t getFilesize(FILE *f) {
+    if (!f)
+        throw std::runtime_error("Invalid file pointer is provided");
+
+    fseek(f, 0, SEEK_END);
+    size_t sz = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    return sz;
+}
+
+char *skipSpaces(char *str) {
+    while (isblank(*str) && *str != '\0')
+        str++;
+
+    return str;
+}
 
 enum NODE_TYPE {
     D,
@@ -30,41 +49,78 @@ enum NODE_TYPE {
     EQUAL
 };
 
+class runtime_error : public std::exception {
+private:
+    const char *file;
+    int line;
+    const char *func;
+    const char *info;
+
+public:
+    
+};
+
 class AssemblyListing {
 private:
 
 public:
     AssemblyListing();                                                          // Default constructor
-    AssemblyListing(AssemblyListing&& other);                                   // Move constructor
-    AssemblyListing& operator=(AssemblyListing&& other);                        // Move assignment operator
-    AssemblyListing(const AssemblyListing& other) = delete;                     // Prohibit copy construction
-    AssemblyListing& operator=(const AssemblyListing& other) = delete;          // Prohibit copy assignment
+    AssemblyListing(AssemblyListing &&other);                                   // Move constructor
+    AssemblyListing &operator=(AssemblyListing &&other);                        // Move assignment operator
+    AssemblyListing(const AssemblyListing &other) = delete;                     // Prohibit copy construction
+    AssemblyListing &operator=(const AssemblyListing &other) = delete;          // Prohibit copy assignment
     ~AssemblyListing();                                                         // Destructor
 };
 
 class AbstractSyntaxNode {
 private:
-
+    NODE_TYPE type;                                                             // Get current node type
+    AbstractSyntaxNode *left;                                                   // Pointer to the left child of the node
+    AbstractSyntaxNode *right;                                                  // Pointer to the right child of the node
+    AbstractSyntaxNode *parent;                                                 // Pointer to the parent of the node
+    int id;                                                                     // Node identifier
 public:
     AbstractSyntaxNode();                                                       // Default constructor
-    AbstractSyntaxNode(const AbstractSyntaxNode& other);                        // Copy constructor
-    AbstractSyntaxNode& operator=(const AbstractSyntaxNode& other);             // Copy assignment
-    AbstractSyntaxNode(AbstractSyntaxNode&& other);                             // Move constructor
-    AbstractSyntaxNode& operator=(AbstractSyntaxNode&& other);                  // Move assignment
+    AbstractSyntaxNode(const AbstractSyntaxNode &other);                        // Copy constructor
+    AbstractSyntaxNode &operator=(const AbstractSyntaxNode &other);             // Copy assignment
+    AbstractSyntaxNode(AbstractSyntaxNode &&other);                             // Move constructor
+    AbstractSyntaxNode &operator=(AbstractSyntaxNode &&other);                  // Move assignment
     ~AbstractSyntaxNode();                                                      // Destructor
+
+    NODE_TYPE getType();                                                        // Node type getter
 };
 
 class AbstractSyntaxTree {
 private:
-
+    AbstractSyntaxNode *root;                                                   // Tree root
+    void reset();                                                               // Empty the tree
 public:
     AbstractSyntaxTree();                                                       // Default constructor
-    AbstractSyntaxTree& operator=(AbstractSyntaxTree&& other);                  // Move assignment operator
-    AbstractSyntaxTree(AbstractSyntaxTree&& other);                             // Move constructor
-    AbstractSyntaxTree(const AbstractSyntaxTree& other) = delete;               // Prohibit copy construction
-    AbstractSyntaxTree& operator=(const AbstractSyntaxTree& other) = delete;    // Prohibit copy assignment
+    void load(const char *filename);                                            // Load tree from file
+    AbstractSyntaxTree &operator=(AbstractSyntaxTree &&other);                  // Move assignment operator
+    AbstractSyntaxTree(AbstractSyntaxTree &&other);                             // Move constructor
+    AbstractSyntaxTree(const AbstractSyntaxTree &other) = delete;               // Prohibit copy construction
+    AbstractSyntaxTree &operator=(const AbstractSyntaxTree &other) = delete;    // Prohibit copy assignment
     ~AbstractSyntaxTree();                                                      // Destructor
 };
+
+void AbstractSyntaxTree::load(const char *filename) {
+    if (!filename)
+        throw std::runtime_error("Invalid pointer to filename is provided to AbstractSyntaxTree::load function.");
+
+    FILE *inputFile = fopen(filename, "r");
+
+    if (!inputFile)
+        throw std::runtime_error("Unable to open file in AbstractSyntaxTree::load function");
+
+    size_t filesize = getFilesize(inputFile);
+
+    char *serialized = new char[filesize]();
+    fread(serialized, sizeof(char), filesize, inputFile);
+    fclose(inputFile);
+
+    serialized = skipSpaces(serialized);
+}
 
 int main() {
 
