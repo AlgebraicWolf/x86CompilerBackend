@@ -1,6 +1,10 @@
 #include <iostream>
 #include <exception>
 
+#define STR(x) #x
+#define STRINGIFY(x) STR(x)
+#define throw_exception(str) throw runtime_error("In " __FILE__ ":" STRINGIFY(__LINE__) ", the following exception occured:\n" str)
+
 size_t getFilesize(FILE *f) {
     if (!f)
         throw std::runtime_error("Invalid file pointer is provided");
@@ -51,13 +55,13 @@ enum NODE_TYPE {
 
 class runtime_error : public std::exception {
 private:
-    const char *file;
-    int line;
-    const char *func;
-    const char *info;
+    const char *msg;
 
 public:
-    
+    runtime_error(const char *msg) : std::exception(), msg(msg) {}
+    [[nodiscard]] const char * what() const throw() override {
+        return msg;
+    }
 };
 
 class AssemblyListing {
@@ -123,6 +127,6 @@ void AbstractSyntaxTree::load(const char *filename) {
 }
 
 int main() {
-
+    throw_exception("Testing...");
     return 0;
 }
