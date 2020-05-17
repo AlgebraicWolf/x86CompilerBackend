@@ -6,8 +6,12 @@
 
 #IncludeRegexTransform: 
 
-/home/alexey/Programming/x86CompilerBackend/main.cpp
-iostream
+/home/alexey/Programming/x86CompilerBackend/utilities.cpp
+cstring
+-
+cstdio
+-
+cctype
 -
 exception
 -

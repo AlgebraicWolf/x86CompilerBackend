@@ -131,6 +131,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named Utilities
+
+# Build rule for target.
+Utilities: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Utilities
+.PHONY : Utilities
+
+# fast build rule for target.
+Utilities/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Utilities.dir/build.make CMakeFiles/Utilities.dir/build
+.PHONY : Utilities/fast
+
+#=============================================================================
 # Target rules for targets named x86CompilerBackend
 
 # Build rule for target.
@@ -142,6 +155,33 @@ x86CompilerBackend: cmake_check_build_system
 x86CompilerBackend/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/x86CompilerBackend.dir/build.make CMakeFiles/x86CompilerBackend.dir/build
 .PHONY : x86CompilerBackend/fast
+
+AbstractSyntaxTree.o: AbstractSyntaxTree.cpp.o
+
+.PHONY : AbstractSyntaxTree.o
+
+# target to build an object file
+AbstractSyntaxTree.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Utilities.dir/build.make CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.o
+.PHONY : AbstractSyntaxTree.cpp.o
+
+AbstractSyntaxTree.i: AbstractSyntaxTree.cpp.i
+
+.PHONY : AbstractSyntaxTree.i
+
+# target to preprocess a source file
+AbstractSyntaxTree.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Utilities.dir/build.make CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.i
+.PHONY : AbstractSyntaxTree.cpp.i
+
+AbstractSyntaxTree.s: AbstractSyntaxTree.cpp.s
+
+.PHONY : AbstractSyntaxTree.s
+
+# target to generate assembly for a file
+AbstractSyntaxTree.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Utilities.dir/build.make CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.s
+.PHONY : AbstractSyntaxTree.cpp.s
 
 main.o: main.cpp.o
 
@@ -170,6 +210,33 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/x86CompilerBackend.dir/build.make CMakeFiles/x86CompilerBackend.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+utilities.o: utilities.cpp.o
+
+.PHONY : utilities.o
+
+# target to build an object file
+utilities.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Utilities.dir/build.make CMakeFiles/Utilities.dir/utilities.cpp.o
+.PHONY : utilities.cpp.o
+
+utilities.i: utilities.cpp.i
+
+.PHONY : utilities.i
+
+# target to preprocess a source file
+utilities.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Utilities.dir/build.make CMakeFiles/Utilities.dir/utilities.cpp.i
+.PHONY : utilities.cpp.i
+
+utilities.s: utilities.cpp.s
+
+.PHONY : utilities.s
+
+# target to generate assembly for a file
+utilities.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Utilities.dir/build.make CMakeFiles/Utilities.dir/utilities.cpp.s
+.PHONY : utilities.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -178,10 +245,17 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... Utilities"
 	@echo "... x86CompilerBackend"
+	@echo "... AbstractSyntaxTree.o"
+	@echo "... AbstractSyntaxTree.i"
+	@echo "... AbstractSyntaxTree.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... utilities.o"
+	@echo "... utilities.i"
+	@echo "... utilities.s"
 .PHONY : help
 
 
