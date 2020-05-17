@@ -1,2 +1,2 @@
-/usr/bin/ar qc libUtilities.a  CMakeFiles/Utilities.dir/utilities.cpp.o CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.o
+/usr/bin/ar qc libUtilities.a  CMakeFiles/Utilities.dir/utilities.cpp.o
 /usr/bin/ranlib libUtilities.a

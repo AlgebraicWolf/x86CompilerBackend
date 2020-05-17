@@ -90,32 +90,17 @@ CMakeFiles/Utilities.dir/utilities.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Utilities.dir/utilities.cpp.s"
 	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/alexey/Programming/x86CompilerBackend/utilities.cpp -o CMakeFiles/Utilities.dir/utilities.cpp.s
 
-CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.o: CMakeFiles/Utilities.dir/flags.make
-CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.o: ../AbstractSyntaxTree.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.o"
-	/usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.o -c /home/alexey/Programming/x86CompilerBackend/AbstractSyntaxTree.cpp
-
-CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/alexey/Programming/x86CompilerBackend/AbstractSyntaxTree.cpp > CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.i
-
-CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/alexey/Programming/x86CompilerBackend/AbstractSyntaxTree.cpp -o CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.s
-
 # Object files for target Utilities
 Utilities_OBJECTS = \
-"CMakeFiles/Utilities.dir/utilities.cpp.o" \
-"CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.o"
+"CMakeFiles/Utilities.dir/utilities.cpp.o"
 
 # External object files for target Utilities
 Utilities_EXTERNAL_OBJECTS =
 
 libUtilities.a: CMakeFiles/Utilities.dir/utilities.cpp.o
-libUtilities.a: CMakeFiles/Utilities.dir/AbstractSyntaxTree.cpp.o
 libUtilities.a: CMakeFiles/Utilities.dir/build.make
 libUtilities.a: CMakeFiles/Utilities.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libUtilities.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX static library libUtilities.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/Utilities.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Utilities.dir/link.txt --verbose=$(VERBOSE)
 

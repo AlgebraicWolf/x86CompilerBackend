@@ -9,13 +9,6 @@
 // Created by alexey on 17.05.2020.
 //
 
-runtime_error::runtime_error(const char *msg) : std::exception(), msg(msg) {}
-
-const char* runtime_error::what() const throw() {
-    return msg;
-}
-
-
 size_t getFilesize(FILE *f) {
     if (!f)
         throw_exception("Invalid file pointer is provided");
@@ -52,6 +45,13 @@ const char *getNum(const char *serializedString, int &dst) {
     return serializedString + scanned;
 }
 
-const char *getString() {
+const char *getIdentifier(const char *serialized, int& length) {
+    if(!serialized)
+        throw_exception("Invalid string pointer is provided to identifier parser");
 
+    const char *identifier = nullptr;
+    sscanf(serialized, "%m[a-zA-Z_]%n", &identifier, &length);
+
+    return identifier;
 }
+

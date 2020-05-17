@@ -6,6 +6,26 @@
 
 #IncludeRegexTransform: 
 
+/home/alexey/Programming/x86CompilerBackend/AbstractSyntaxTree.hpp
+utilities.hpp
+/home/alexey/Programming/x86CompilerBackend/utilities.hpp
+HashTable.hpp
+/home/alexey/Programming/x86CompilerBackend/HashTable.hpp
+Vector.hpp
+/home/alexey/Programming/x86CompilerBackend/Vector.hpp
+
+/home/alexey/Programming/x86CompilerBackend/HashTable.hpp
+cstring
+-
+immintrin.h
+-
+
+/home/alexey/Programming/x86CompilerBackend/Vector.hpp
+cstddef
+-
+utility
+-
+
 /home/alexey/Programming/x86CompilerBackend/main.cpp
 iostream
 -
@@ -13,6 +33,12 @@ exception
 -
 utilities.hpp
 /home/alexey/Programming/x86CompilerBackend/utilities.hpp
+AbstractSyntaxTree.hpp
+/home/alexey/Programming/x86CompilerBackend/AbstractSyntaxTree.hpp
 
 /home/alexey/Programming/x86CompilerBackend/utilities.hpp
+exception
+-
+cstdio
+-
 

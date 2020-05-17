@@ -1,0 +1,2 @@
+/usr/bin/ar qc libAbstractSyntaxTree.a  CMakeFiles/AbstractSyntaxTree.dir/AbstractSyntaxTree.cpp.o
+/usr/bin/ranlib libAbstractSyntaxTree.a

@@ -17,6 +17,8 @@ public:
 };
 
 int main() {
-    throw_exception("Testing...");
+    AbstractSyntaxTree ASTree;
+    ASTree.load("input.ast");
+    ASTree.dump("out.dot");
     return 0;
 }
