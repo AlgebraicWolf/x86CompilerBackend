@@ -18,6 +18,7 @@ set(CMAKE_TARGET_LINKED_INFO_FILES
   "/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/HashTable.dir/DependInfo.cmake"
   "/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/Vector.dir/DependInfo.cmake"
   "/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/AbstractSyntaxTree.dir/DependInfo.cmake"
+  "/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/AssemblyTools.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

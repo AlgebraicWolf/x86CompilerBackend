@@ -73,11 +73,12 @@ CMAKE_BINARY_DIR = /home/alexey/Programming/x86CompilerBackend/cmake-build-debug
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/Vector.dir/all
+all: CMakeFiles/x86CompilerBackend.dir/all
 all: CMakeFiles/AbstractSyntaxTree.dir/all
 all: CMakeFiles/HashTable.dir/all
 all: CMakeFiles/Utilities.dir/all
-all: CMakeFiles/x86CompilerBackend.dir/all
+all: CMakeFiles/Vector.dir/all
+all: CMakeFiles/AssemblyTools.dir/all
 
 .PHONY : all
 
@@ -87,40 +88,45 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/Vector.dir/clean
+clean: CMakeFiles/x86CompilerBackend.dir/clean
 clean: CMakeFiles/AbstractSyntaxTree.dir/clean
 clean: CMakeFiles/HashTable.dir/clean
 clean: CMakeFiles/Utilities.dir/clean
-clean: CMakeFiles/x86CompilerBackend.dir/clean
+clean: CMakeFiles/Vector.dir/clean
+clean: CMakeFiles/AssemblyTools.dir/clean
 
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/Vector.dir
+# Target rules for target CMakeFiles/x86CompilerBackend.dir
 
 # All Build rule for target.
-CMakeFiles/Vector.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Vector.dir/build.make CMakeFiles/Vector.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Vector.dir/build.make CMakeFiles/Vector.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles --progress-num=7,8 "Built target Vector"
-.PHONY : CMakeFiles/Vector.dir/all
+CMakeFiles/x86CompilerBackend.dir/all: CMakeFiles/AbstractSyntaxTree.dir/all
+CMakeFiles/x86CompilerBackend.dir/all: CMakeFiles/HashTable.dir/all
+CMakeFiles/x86CompilerBackend.dir/all: CMakeFiles/Utilities.dir/all
+CMakeFiles/x86CompilerBackend.dir/all: CMakeFiles/Vector.dir/all
+CMakeFiles/x86CompilerBackend.dir/all: CMakeFiles/AssemblyTools.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/x86CompilerBackend.dir/build.make CMakeFiles/x86CompilerBackend.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/x86CompilerBackend.dir/build.make CMakeFiles/x86CompilerBackend.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles --progress-num=11,12 "Built target x86CompilerBackend"
+.PHONY : CMakeFiles/x86CompilerBackend.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/Vector.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles 2
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/Vector.dir/all
+CMakeFiles/x86CompilerBackend.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles 12
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/x86CompilerBackend.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles 0
-.PHONY : CMakeFiles/Vector.dir/rule
+.PHONY : CMakeFiles/x86CompilerBackend.dir/rule
 
 # Convenience name for target.
-Vector: CMakeFiles/Vector.dir/rule
+x86CompilerBackend: CMakeFiles/x86CompilerBackend.dir/rule
 
-.PHONY : Vector
+.PHONY : x86CompilerBackend
 
 # clean rule for target.
-CMakeFiles/Vector.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Vector.dir/build.make CMakeFiles/Vector.dir/clean
-.PHONY : CMakeFiles/Vector.dir/clean
+CMakeFiles/x86CompilerBackend.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/x86CompilerBackend.dir/build.make CMakeFiles/x86CompilerBackend.dir/clean
+.PHONY : CMakeFiles/x86CompilerBackend.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/AbstractSyntaxTree.dir
@@ -156,7 +162,7 @@ CMakeFiles/AbstractSyntaxTree.dir/clean:
 CMakeFiles/HashTable.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/HashTable.dir/build.make CMakeFiles/HashTable.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/HashTable.dir/build.make CMakeFiles/HashTable.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles --progress-num=3,4 "Built target HashTable"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles --progress-num=5,6 "Built target HashTable"
 .PHONY : CMakeFiles/HashTable.dir/all
 
 # Build rule for subdir invocation for target.
@@ -183,7 +189,7 @@ CMakeFiles/HashTable.dir/clean:
 CMakeFiles/Utilities.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Utilities.dir/build.make CMakeFiles/Utilities.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Utilities.dir/build.make CMakeFiles/Utilities.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles --progress-num=5,6 "Built target Utilities"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles --progress-num=7,8 "Built target Utilities"
 .PHONY : CMakeFiles/Utilities.dir/all
 
 # Build rule for subdir invocation for target.
@@ -204,34 +210,58 @@ CMakeFiles/Utilities.dir/clean:
 .PHONY : CMakeFiles/Utilities.dir/clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/x86CompilerBackend.dir
+# Target rules for target CMakeFiles/Vector.dir
 
 # All Build rule for target.
-CMakeFiles/x86CompilerBackend.dir/all: CMakeFiles/Vector.dir/all
-CMakeFiles/x86CompilerBackend.dir/all: CMakeFiles/AbstractSyntaxTree.dir/all
-CMakeFiles/x86CompilerBackend.dir/all: CMakeFiles/HashTable.dir/all
-CMakeFiles/x86CompilerBackend.dir/all: CMakeFiles/Utilities.dir/all
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/x86CompilerBackend.dir/build.make CMakeFiles/x86CompilerBackend.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/x86CompilerBackend.dir/build.make CMakeFiles/x86CompilerBackend.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles --progress-num=9,10 "Built target x86CompilerBackend"
-.PHONY : CMakeFiles/x86CompilerBackend.dir/all
+CMakeFiles/Vector.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Vector.dir/build.make CMakeFiles/Vector.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Vector.dir/build.make CMakeFiles/Vector.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles --progress-num=9,10 "Built target Vector"
+.PHONY : CMakeFiles/Vector.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/x86CompilerBackend.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles 10
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/x86CompilerBackend.dir/all
+CMakeFiles/Vector.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/Vector.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles 0
-.PHONY : CMakeFiles/x86CompilerBackend.dir/rule
+.PHONY : CMakeFiles/Vector.dir/rule
 
 # Convenience name for target.
-x86CompilerBackend: CMakeFiles/x86CompilerBackend.dir/rule
+Vector: CMakeFiles/Vector.dir/rule
 
-.PHONY : x86CompilerBackend
+.PHONY : Vector
 
 # clean rule for target.
-CMakeFiles/x86CompilerBackend.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/x86CompilerBackend.dir/build.make CMakeFiles/x86CompilerBackend.dir/clean
-.PHONY : CMakeFiles/x86CompilerBackend.dir/clean
+CMakeFiles/Vector.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Vector.dir/build.make CMakeFiles/Vector.dir/clean
+.PHONY : CMakeFiles/Vector.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/AssemblyTools.dir
+
+# All Build rule for target.
+CMakeFiles/AssemblyTools.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AssemblyTools.dir/build.make CMakeFiles/AssemblyTools.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AssemblyTools.dir/build.make CMakeFiles/AssemblyTools.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles --progress-num=3,4 "Built target AssemblyTools"
+.PHONY : CMakeFiles/AssemblyTools.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/AssemblyTools.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/AssemblyTools.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles 0
+.PHONY : CMakeFiles/AssemblyTools.dir/rule
+
+# Convenience name for target.
+AssemblyTools: CMakeFiles/AssemblyTools.dir/rule
+
+.PHONY : AssemblyTools
+
+# clean rule for target.
+CMakeFiles/AssemblyTools.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AssemblyTools.dir/build.make CMakeFiles/AssemblyTools.dir/clean
+.PHONY : CMakeFiles/AssemblyTools.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

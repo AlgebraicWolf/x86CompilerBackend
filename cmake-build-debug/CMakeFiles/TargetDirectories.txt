@@ -1,7 +1,8 @@
 /home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/Vector.dir
+/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/x86CompilerBackend.dir
 /home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/AbstractSyntaxTree.dir
 /home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/HashTable.dir
 /home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/Utilities.dir
-/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/x86CompilerBackend.dir
+/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/Vector.dir
+/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles/AssemblyTools.dir

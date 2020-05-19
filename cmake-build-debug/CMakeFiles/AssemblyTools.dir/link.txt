@@ -1,0 +1,2 @@
+/usr/bin/ar qc libAssemblyTools.a  CMakeFiles/AssemblyTools.dir/AssemblyTools.cpp.o
+/usr/bin/ranlib libAssemblyTools.a

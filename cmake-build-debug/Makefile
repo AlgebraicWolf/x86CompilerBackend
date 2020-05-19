@@ -131,17 +131,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named Vector
+# Target rules for targets named x86CompilerBackend
 
 # Build rule for target.
-Vector: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Vector
-.PHONY : Vector
+x86CompilerBackend: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 x86CompilerBackend
+.PHONY : x86CompilerBackend
 
 # fast build rule for target.
-Vector/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Vector.dir/build.make CMakeFiles/Vector.dir/build
-.PHONY : Vector/fast
+x86CompilerBackend/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/x86CompilerBackend.dir/build.make CMakeFiles/x86CompilerBackend.dir/build
+.PHONY : x86CompilerBackend/fast
 
 #=============================================================================
 # Target rules for targets named AbstractSyntaxTree
@@ -183,17 +183,30 @@ Utilities/fast:
 .PHONY : Utilities/fast
 
 #=============================================================================
-# Target rules for targets named x86CompilerBackend
+# Target rules for targets named Vector
 
 # Build rule for target.
-x86CompilerBackend: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 x86CompilerBackend
-.PHONY : x86CompilerBackend
+Vector: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Vector
+.PHONY : Vector
 
 # fast build rule for target.
-x86CompilerBackend/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/x86CompilerBackend.dir/build.make CMakeFiles/x86CompilerBackend.dir/build
-.PHONY : x86CompilerBackend/fast
+Vector/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Vector.dir/build.make CMakeFiles/Vector.dir/build
+.PHONY : Vector/fast
+
+#=============================================================================
+# Target rules for targets named AssemblyTools
+
+# Build rule for target.
+AssemblyTools: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AssemblyTools
+.PHONY : AssemblyTools
+
+# fast build rule for target.
+AssemblyTools/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AssemblyTools.dir/build.make CMakeFiles/AssemblyTools.dir/build
+.PHONY : AssemblyTools/fast
 
 AbstractSyntaxTree.o: AbstractSyntaxTree.cpp.o
 
@@ -221,6 +234,33 @@ AbstractSyntaxTree.s: AbstractSyntaxTree.cpp.s
 AbstractSyntaxTree.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbstractSyntaxTree.dir/build.make CMakeFiles/AbstractSyntaxTree.dir/AbstractSyntaxTree.cpp.s
 .PHONY : AbstractSyntaxTree.cpp.s
+
+AssemblyTools.o: AssemblyTools.cpp.o
+
+.PHONY : AssemblyTools.o
+
+# target to build an object file
+AssemblyTools.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AssemblyTools.dir/build.make CMakeFiles/AssemblyTools.dir/AssemblyTools.cpp.o
+.PHONY : AssemblyTools.cpp.o
+
+AssemblyTools.i: AssemblyTools.cpp.i
+
+.PHONY : AssemblyTools.i
+
+# target to preprocess a source file
+AssemblyTools.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AssemblyTools.dir/build.make CMakeFiles/AssemblyTools.dir/AssemblyTools.cpp.i
+.PHONY : AssemblyTools.cpp.i
+
+AssemblyTools.s: AssemblyTools.cpp.s
+
+.PHONY : AssemblyTools.s
+
+# target to generate assembly for a file
+AssemblyTools.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/AssemblyTools.dir/build.make CMakeFiles/AssemblyTools.dir/AssemblyTools.cpp.s
+.PHONY : AssemblyTools.cpp.s
 
 HashTable.o: HashTable.cpp.o
 
@@ -339,6 +379,7 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... AbstractSyntaxTree"
+	@echo "... AssemblyTools"
 	@echo "... HashTable"
 	@echo "... Utilities"
 	@echo "... Vector"
@@ -346,6 +387,9 @@ help:
 	@echo "... AbstractSyntaxTree.o"
 	@echo "... AbstractSyntaxTree.i"
 	@echo "... AbstractSyntaxTree.s"
+	@echo "... AssemblyTools.o"
+	@echo "... AssemblyTools.i"
+	@echo "... AssemblyTools.s"
 	@echo "... HashTable.o"
 	@echo "... HashTable.i"
 	@echo "... HashTable.s"

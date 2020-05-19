@@ -13,6 +13,8 @@ add_library(HashTable HashTable.cpp)
 
 add_library(Vector Vector.cpp)
 
+add_library(AssemblyTools AssemblyTools.cpp)
+
 add_executable(x86CompilerBackend main.cpp)
 
-target_link_libraries(x86CompilerBackend Utilities HashTable Vector AbstractSyntaxTree)
+target_link_libraries(x86CompilerBackend Utilities HashTable Vector AbstractSyntaxTree AssemblyTools)

@@ -48,9 +48,10 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/Vector.dir/DependInfo.cmake"
+  "CMakeFiles/x86CompilerBackend.dir/DependInfo.cmake"
   "CMakeFiles/AbstractSyntaxTree.dir/DependInfo.cmake"
   "CMakeFiles/HashTable.dir/DependInfo.cmake"
   "CMakeFiles/Utilities.dir/DependInfo.cmake"
-  "CMakeFiles/x86CompilerBackend.dir/DependInfo.cmake"
+  "CMakeFiles/Vector.dir/DependInfo.cmake"
+  "CMakeFiles/AssemblyTools.dir/DependInfo.cmake"
   )
