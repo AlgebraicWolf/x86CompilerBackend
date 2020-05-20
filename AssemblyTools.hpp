@@ -22,23 +22,25 @@ enum REGISTER {
 };
 
 enum OP_TYPE {
-    NOP,
-    INT,
-    MOV_REG_REG,
-    MOV_REG_IMM,
-    MOV_REG_RAM,
+//    NOP,
+//    INT,
+//    MOV_REG_REG,
+//    MOV_REG_IMM,
+            MOV_REG_RAM,
     MOV_RAM_REG,
-    MOV_RM_REG,
-    MOV_REG_RM,
-    JMP,
-    JG,
-    JGE,
-    JL,
-    JLE,
-    JE,
-    JNE,
-    RET,
-    CALL,
+//    MOV_RM_REG_OFF8,
+//    MOV_RM_REG_OFF32,
+//    MOV_REG_RM_OFF8,
+//    MOV_REG_RM_OFF32,
+            JMP,
+//    JG,
+//    JGE,
+//    JL,
+//    JLE,
+//    JE,
+//    JNE,
+//    RET,
+//    CALL,
     DIV,
     MUL,
     INC,
@@ -68,7 +70,8 @@ private:
 
 public:
     virtual void toNASM(FILE *output) = 0;                          // Translate instruction to NASM
-    virtual void toBytecode(Bytecode buf) = 0;                        // Translate instruction to bytecode
+    virtual void toBytecode(Bytecode buf) = 0;                      // Translate instruction to bytecode
+    virtual int getSize() = 0;                                      // Length of command in bytes
 };
 
 class nop : public Operation {
@@ -102,7 +105,7 @@ private:
     REGISTER to;
     int imm;
 public:
-    mov_reg_imm(REGISTER to, int imm) : to(to), imm(imm) { }
+    mov_reg_imm(REGISTER to, int imm) : to(to), imm(imm) {}
 
     virtual void toNASM(FILE *output) {
         fprintf(output, "    mov %s, %d\n", regToText(to), imm);
@@ -129,9 +132,265 @@ public:
     }
 };
 
+class mov_rm_reg_off8 : public Operation {
+private:
+    REGISTER rmreg;
+    char offset;
+    REGISTER from;
+public:
+    mov_rm_reg_off8(REGISTER rmreg, char offset, REGISTER from) : rmreg(rmreg), offset(offset), from(from) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    mov [%s%+d], %s\n", regToText(rmreg), offset, regToText(from));
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
+class mov_rm_reg_off32 : public Operation {
+private:
+    REGISTER rmreg;
+    int offset;
+    REGISTER from;
+public:
+    mov_rm_reg_off32(REGISTER rmreg, int offset, REGISTER from) : rmreg(rmreg), offset(offset), from(from) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    mov [%s%+d], %s\n", regToText(rmreg), offset, regToText(from));
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
+class mov_reg_rm_off8 : public Operation {
+private:
+    REGISTER rmreg;
+    char offset;
+    REGISTER to;
+public:
+    mov_reg_rm_off8(REGISTER to, REGISTER rmreg, char offset) : rmreg(rmreg), offset(offset), to(to) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    mov %s, [%s%+d]\n", regToText(to), regToText(rmreg), offset);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
+class mov_reg_rm_off32 : public Operation {
+private:
+    REGISTER rmreg;
+    int offset;
+    REGISTER to;
+public:
+    mov_reg_rm_off32(REGISTER to, REGISTER rmreg, int offset) : rmreg(rmreg), offset(offset), to(to) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    mov %s, [%s%+d]\n", regToText(to), regToText(rmreg), offset);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
+class call : public Operation {
+private:
+    int listingId;
+    int offset;
+public:
+    explicit call(int listingId) : listingId(listingId) {}
+
+    int getListingId() {
+        return listingId;
+    }
+
+    int setOffset(int offset) {
+        this->offset = offset;
+    }
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    call listing%d\n", listingId);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
+class ret : public Operation {
+private:
+
+public:
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    ret\n");
+    }
+};
+
+class ret_pop : public Operation {
+private:
+    unsigned short to_pop;
+public:
+    ret_pop(unsigned short to_pop) : to_pop(to_pop) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    ret %d\n", to_pop);
+    }
+};
+
+class Jump : public Operation {
+protected:
+    int offset;
+    int labelId;
+public:
+    explicit Jump (int labelId) : labelId(labelId), offset(0) {}
+
+    int getLabelId() {
+        return labelId;
+    }
+
+    void setOffset(int offset) {
+        this->offset = offset;
+    }
+
+    virtual int getSize() {
+        return 5;
+    }
+};
+
+class jmp : public Jump {
+public:
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    jmp .label%d", labelId);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
+class jg : public Jump {
+public:
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    jg .label%d", labelId);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
+
+// TODO jge, jl, jle, je, jne
+
+class comment : public Operation {
+private:
+    const char *msg;
+public:
+    comment(const char *msg) : msg(msg) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    ; %s\n", msg);
+    }
+
+    virtual void toBytecode(Bytecode buf) {}
+};
+
+class inc_reg : public Operation {
+private:
+    REGISTER reg;
+public:
+    inc_reg(REGISTER reg) : reg(reg) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    inc %s\n", regToText(reg));
+    }
+};
+
+class inc_rm_off8 : public Operation {
+private:
+    REGISTER reg;
+    char offset;
+public:
+    inc_rm_off8(REGISTER reg, char offset) : reg(reg), offset(offset) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    inc [%s%+d]\n", regToText(reg), offset);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
+class inc_rm_off32 : public Operation {
+private:
+    REGISTER reg;
+    int offset;
+public:
+    inc_rm_off32(REGISTER reg, int offset) : reg(reg), offset(offset) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    inc [%s%+d]\n", regToText(reg), offset);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
+class dec_reg : public Operation {
+private:
+    REGISTER reg;
+public:
+    dec_reg(REGISTER reg) : reg(reg) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    dec %s\n", regToText(reg));
+    }
+};
+
+class dec_rm_off8 : public Operation {
+private:
+    REGISTER reg;
+    char offset;
+public:
+    dec_rm_off8(REGISTER reg, char offset) : reg(reg), offset(offset) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    dec [%s%+d]\n", regToText(reg), offset);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
+class dec_rm_off32 : public Operation {
+private:
+    REGISTER reg;
+    int offset;
+public:
+    dec_rm_off32(REGISTER reg, int offset) : reg(reg), offset(offset) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    dec [%s%+d]\n", regToText(reg), offset);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
 class AssemblyListing {
 private:
-    vector<Operation*> ops;                                         // Vector of operations i. e. part of the program
+    vector<Operation *> ops;                                         // Vector of operations i. e. part of the program
 public:
     AssemblyListing();                                              // Default constructor
     AssemblyListing(AssemblyListing &&other) noexcept;              // Move constructor
@@ -185,7 +444,8 @@ public:
     AssemblyProgram &operator=(const AssemblyProgram &other) = delete; // Prohibit copy assignment
 
     int pushListing(AssemblyListing &&lst);                         // Push listing to the program, return listing id
-    size_t appendBytesToData(const char *bytes, int len);           // Appends bytes to data, returns offset from the beginning of .data section
+    size_t appendBytesToData(const char *bytes,
+                             int len);           // Appends bytes to data, returns offset from the beginning of .data section
 
     void setMainListing(int pos);                                   // Set listing for main function
 
