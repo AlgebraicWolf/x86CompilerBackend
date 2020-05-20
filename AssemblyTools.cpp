@@ -49,8 +49,10 @@ void AssemblyListing::ret(unsigned short to_pop) {
 }
 
 int AssemblyListing::addLocalLabel() {
+    int num = labels.getSize();
     labels.push_back(pos);
-    return labels.getSize() - 1;
+    addOperation(new label(pos));
+    return num;
 }
 
 void AssemblyListing::interrupt(char int_num) {
@@ -131,7 +133,7 @@ AssemblyListing::~AssemblyListing() {
     }
 }
 
-AssemblyListing::AssemblyListing() = default;
+AssemblyListing::AssemblyListing() : ops(), labels(), pos(0) {}
 
 AssemblyListing::AssemblyListing(AssemblyListing &&other) noexcept {
     std::swap(*this, other);
@@ -142,15 +144,43 @@ AssemblyListing& AssemblyListing::operator=(AssemblyListing &&other) noexcept {
     return *this;
 }
 
+
 AssemblyProgram::AssemblyProgram() : listings(), main(0) {}
 
-AssemblyProgram::AssemblyProgram(AssemblyProgram &&other) {
+AssemblyProgram::AssemblyProgram(AssemblyProgram &&other) noexcept {
     swap(*this, other);
 }
 
-AssemblyProgram& AssemblyProgram::operator=(AssemblyProgram &&other) {
+AssemblyProgram& AssemblyProgram::operator=(AssemblyProgram &&other) noexcept {
     swap(*this, other);
+    return *this;
 }
 
+
+void AssemblyProgram::setMainListing(int pos) {
+    main = pos;
+}
+
+int AssemblyProgram::pushListing(AssemblyListing &&lst) {
+    listings.push_back(forward<AssemblyListing>(lst));
+    return listings.getSize() - 1;
+}
+
+void AssemblyProgram::toNASM(char *filename) {
+    FILE *output = fopen(filename, "w");
+
+    if(!output)
+        throw_exception("Unable to open file");
+
+    fprintf(output, "SEGMENT .text\n"
+                            "GLOBAL _start\n\n"
+                            "_start:\n"
+                            "    call listing%d\n"
+                            "    mov eax, 1\n"
+                            "    xor ebx, ebx\n"
+                            "    int 80h\n\n", main);
+
+
+}
 
 

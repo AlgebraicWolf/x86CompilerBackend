@@ -41,7 +41,30 @@ void swap(T& a, T& b) {
     b = std::move(a);
 }
 
+template <typename T>
+struct remove_reference {
+    typedef T type;
+};
 
+template <typename T>
+struct remove_reference<T&> {
+    typedef T type;
+};
+
+template <typename T>
+struct remove_reference<T&&> {
+    typedef T type;
+};
+
+template <typename T>
+constexpr T&& forward(typename remove_reference<T>::type& t) noexcept {
+    return static_cast<T &&>(t);
+}
+
+template <typename T>
+constexpr T&& forward(typename remove_reference<T>::type&& t) noexcept {
+    return static_cast<T &&>(t);
+}
 
 
 #endif //X86COMPILERBACKEND_UTILITIES_HPP

@@ -586,6 +586,24 @@ public:
     }
 };
 
+class label : public Operation {
+private:
+    int num;
+
+public:
+    label(int num) : num(num) {}
+
+    virtual void toNASM(FILE* output) {
+        fprintf(output, ".label%d:\n", num);
+    }
+
+    virtual void toBytecode(Bytecode buf) {}
+
+    virtual int getSize() {
+        return 0;
+    }
+};
+
 class AssemblyListing {
 private:
     vector<Operation *> ops;                                        // Vector of operations i. e. part of the program
@@ -646,9 +664,9 @@ private:
     unsigned int main;                                              // Position of main listing
 public:
     AssemblyProgram();                                              // Default constructor
-    AssemblyProgram(AssemblyProgram &&other);                       // Move counstructor
+    AssemblyProgram(AssemblyProgram &&other) noexcept;              // Move counstructor
     AssemblyProgram(const AssemblyProgram &other) = delete;         // Prohibit copy constructor
-    AssemblyProgram &operator=(AssemblyProgram &&other);            // Move assignment
+    AssemblyProgram &operator=(AssemblyProgram &&other) noexcept;   // Move assignment
     AssemblyProgram &operator=(const AssemblyProgram &other) = delete; // Prohibit copy assignment
 
     int pushListing(AssemblyListing &&lst);                         // Push listing to the program, return listing id
