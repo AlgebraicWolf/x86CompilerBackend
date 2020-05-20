@@ -72,6 +72,8 @@ public:
     virtual void toNASM(FILE *output) = 0;                          // Translate instruction to NASM
     virtual void toBytecode(Bytecode buf) = 0;                      // Translate instruction to bytecode
     virtual int getSize() = 0;                                      // Length of command in bytes
+
+    virtual ~Operation() = 0;
 };
 
 class nop : public Operation {
@@ -83,6 +85,10 @@ public:
     virtual void toBytecode(Bytecode buf) {
 
     }
+
+    virtual int getSize() {
+        return 1;
+    }
 };
 
 class interrupt : public Operation {
@@ -92,11 +98,15 @@ public:
     interrupt(char int_num) : int_num(int_num) {}
 
     virtual void toNASM(FILE *output) {
-        fprintf(output, "    int %d\n", int_num);
+        fprintf(output, "    int %u\n", int_num);
     }
 
     virtual void toBytecode(Bytecode buf) {
 
+    }
+
+    virtual int getSize() {
+        return 2;
     }
 };
 
@@ -114,6 +124,10 @@ public:
     virtual void toBytecode(Bytecode buf) {
 
     }
+
+    virtual int getSize() {
+        return 5; // B8 + rd + id
+    }
 };
 
 class mov_reg_reg : public Operation {
@@ -129,6 +143,10 @@ public:
 
     virtual void toBytecode(Bytecode buf) {
 
+    }
+
+    virtual int getSize() {
+        return 2;
     }
 };
 
@@ -147,6 +165,10 @@ public:
     virtual void toBytecode(Bytecode buf) {
 
     }
+
+    virtual int getSize() {
+        return 3;
+    }
 };
 
 class mov_rm_reg_off32 : public Operation {
@@ -163,6 +185,10 @@ public:
 
     virtual void toBytecode(Bytecode buf) {
 
+    }
+
+    virtual int getSize() {
+        return 6;
     }
 };
 
@@ -181,6 +207,10 @@ public:
     virtual void toBytecode(Bytecode buf) {
 
     }
+
+    virtual int getSize() {
+        return 3;
+    }
 };
 
 class mov_reg_rm_off32 : public Operation {
@@ -197,6 +227,10 @@ public:
 
     virtual void toBytecode(Bytecode buf) {
 
+    }
+
+    virtual int getSize() {
+        return 6;
     }
 };
 
@@ -222,6 +256,10 @@ public:
     virtual void toBytecode(Bytecode buf) {
 
     }
+
+    virtual int getSize() {
+        return 5;
+    }
 };
 
 class ret : public Operation {
@@ -230,6 +268,14 @@ private:
 public:
     virtual void toNASM(FILE *output) {
         fprintf(output, "    ret\n");
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+
+    virtual int getSize() {
+        return 1;
     }
 };
 
@@ -242,6 +288,14 @@ public:
     virtual void toNASM(FILE *output) {
         fprintf(output, "    ret %d\n", to_pop);
     }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+
+    virtual int getSize() {
+        return 3;
+    }
 };
 
 class Jump : public Operation {
@@ -249,7 +303,7 @@ protected:
     int offset;
     int labelId;
 public:
-    explicit Jump (int labelId) : labelId(labelId), offset(0) {}
+    explicit Jump(int labelId) : labelId(labelId) {}
 
     int getLabelId() {
         return labelId;
@@ -260,12 +314,14 @@ public:
     }
 
     virtual int getSize() {
-        return 5;
+        return 6;
     }
 };
 
 class jmp : public Jump {
 public:
+    explicit jmp(int labelId) : Jump(labelId) {}
+
     virtual void toNASM(FILE *output) {
         fprintf(output, "    jmp .label%d", labelId);
     }
@@ -273,10 +329,16 @@ public:
     virtual void toBytecode(Bytecode buf) {
 
     }
+
+    virtual int getSize() {
+        return 5;
+    }
 };
 
 class jg : public Jump {
 public:
+    explicit jg(int labelId) : Jump(labelId) {}
+
     virtual void toNASM(FILE *output) {
         fprintf(output, "    jg .label%d", labelId);
     }
@@ -286,8 +348,70 @@ public:
     }
 };
 
+class jge : public Jump {
+public:
+    explicit jge(int labelId) : Jump(labelId) {}
 
-// TODO jge, jl, jle, je, jne
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    jge .label%d", labelId);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
+class jl : public Jump {
+public:
+    explicit jl(int labelId) : Jump(labelId) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    jl .label%d", labelId);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
+class jle : public Jump {
+public:
+    explicit jle(int labelId) : Jump(labelId) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    jle .label%d", labelId);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
+class je : public Jump {
+public:
+    explicit je(int labelId) : Jump(labelId) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    je .label%d", labelId);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
+
+class jne : public Jump {
+public:
+    explicit jne(int labelId) : Jump(labelId) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    jne .label%d", labelId);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+};
 
 class comment : public Operation {
 private:
@@ -300,6 +424,10 @@ public:
     }
 
     virtual void toBytecode(Bytecode buf) {}
+
+    virtual int getSize() {
+        return 0;
+    }
 };
 
 class inc_reg : public Operation {
@@ -310,6 +438,14 @@ public:
 
     virtual void toNASM(FILE *output) {
         fprintf(output, "    inc %s\n", regToText(reg));
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+
+    virtual int getSize() {
+        return 1;
     }
 };
 
@@ -327,6 +463,10 @@ public:
     virtual void toBytecode(Bytecode buf) {
 
     }
+
+    virtual int getSize() {
+        return 4;
+    }
 };
 
 class inc_rm_off32 : public Operation {
@@ -343,6 +483,10 @@ public:
     virtual void toBytecode(Bytecode buf) {
 
     }
+
+    virtual int getSize() {
+        return 7;
+    }
 };
 
 class dec_reg : public Operation {
@@ -353,6 +497,14 @@ public:
 
     virtual void toNASM(FILE *output) {
         fprintf(output, "    dec %s\n", regToText(reg));
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+
+    virtual int getSize() {
+        return 1;
     }
 };
 
@@ -370,6 +522,10 @@ public:
     virtual void toBytecode(Bytecode buf) {
 
     }
+
+    virtual int getSize() {
+        return 4;
+    }
 };
 
 class dec_rm_off32 : public Operation {
@@ -386,19 +542,66 @@ public:
     virtual void toBytecode(Bytecode buf) {
 
     }
+
+    virtual int getSize() {
+        return 7;
+    }
+};
+
+class idiv_reg : public Operation {
+private:
+    REGISTER divisor;
+public:
+    idiv_reg(REGISTER divisor) : divisor(divisor) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    idiv %s\n", regToText(divisor));
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+
+    virtual int getSize() {
+        return 2;
+    }
+};
+
+class imul_reg : public Operation {
+private:
+    REGISTER multiplier;
+public:
+    imul_reg(REGISTER multiplier) : multiplier(multiplier) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    imul %s\n", regToText);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+
+    virtual int getSize() {
+        return 2;
+    }
 };
 
 class AssemblyListing {
 private:
-    vector<Operation *> ops;                                         // Vector of operations i. e. part of the program
+    vector<Operation *> ops;                                        // Vector of operations i. e. part of the program
+    vector<unsigned int> labels;                                    // Positions of local labels relative to the beginning of the listing
+    unsigned int pos;                                               // Current position of the end of the listing
+
+    void addOperation(Operation* op);
 public:
     AssemblyListing();                                              // Default constructor
     AssemblyListing(AssemblyListing &&other) noexcept;              // Move constructor
     AssemblyListing &operator=(AssemblyListing &&other) noexcept;   // Move assignment
     AssemblyListing(const AssemblyListing &other) = delete;         // Prohibit copy constructor
     AssemblyListing &operator=(const AssemblyListing &other) = delete;// Prohibit copy assignment
+    ~AssemblyListing();                                             // Destructor
 
-    void syscall();                                                 // syscall
+    void interrupt(char int_num);                                   // interrupt
 
     void nop();                                                     // Good ol' nop
 
@@ -412,6 +615,7 @@ public:
     void mov(REGISTER ptr, int offset, REGISTER from);              // mov size(from) [ptr + offset], from
 
     int addLocalLabel();                                            // Inserts local label at current position
+    void comment(const char *msg);                                  // Insert comment
 
     void jmp(int labelId);                                          // jmp labelId
     void jg(int labelId);                                           // jmp labelId
@@ -422,14 +626,18 @@ public:
     void jne(int labelId);                                          // jmp labelId
 
     void ret();                                                     // ret, yeah
+    void ret(unsigned short to_pop);                                // ret that pops value
     void call(int functionId);                                      // call functionId
 
-    void div();
-
-    void mul();
+    void idiv(REGISTER divisor);
+    void imul(REGISTER multiplier);
 
     void inc(REGISTER what);                                        // inc register
+    void inc(REGISTER ptr, char offset);                            // inc register
+    void inc(REGISTER ptr, int offset);                             // inc register
     void dec(REGISTER what);                                        // dec register
+    void dec(REGISTER ptr, char offset);                            // dec register
+    void dec(REGISTER ptr, int offset);                             // dec register
 };
 
 class AssemblyProgram {

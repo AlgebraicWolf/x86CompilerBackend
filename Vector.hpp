@@ -28,6 +28,7 @@ public:
     void push_back(const T& elem);                              // Append lvalue to back
 
     size_t getSize();
+    T* data();
 };
 
 template<typename T>
@@ -94,6 +95,11 @@ vector<T>::~vector() {
 template<typename T>
 size_t vector<T>::getSize() {
     return size;
+}
+
+template<typename T>
+T* vector<T>::data() {
+    return elems;
 }
 
 #endif //X86COMPILERBACKEND_VECTOR_HPP
