@@ -5,7 +5,24 @@
 #include "AssemblyTools.hpp"
 #include "utilities.hpp"
 
+#define CASE_REGNAME(X) case X: return #X
 
+const int ADDED = 1;
+const int PROCESSED = 2;
+
+constexpr const char *regToText(REGISTER reg) {
+    switch (reg) {
+        CASE_REGNAME(EAX);
+        CASE_REGNAME(EBX);
+        CASE_REGNAME(ECX);
+        CASE_REGNAME(EDX);
+        CASE_REGNAME(EBP);
+        CASE_REGNAME(ESP);
+        CASE_REGNAME(ESI);
+        CASE_REGNAME(EDI);
+    }
+    return "INVALID_REG";
+}
 
 void AssemblyListing::addOperation(Operation *op) {
     ops.push_back(op);
@@ -36,6 +53,10 @@ void AssemblyListing::mov(REGISTER ptr, int offset, REGISTER from) {
     addOperation(new mov_rm_reg_off32(ptr, offset, from));
 }
 
+void AssemblyListing::mov(REGISTER ptr, char offset, char byte) {
+    addOperation(new mov_rm_imm8_off8(ptr, offset, byte));
+}
+
 void AssemblyListing::nop() {
     addOperation(new class nop());
 }
@@ -51,15 +72,16 @@ void AssemblyListing::ret(unsigned short to_pop) {
 int AssemblyListing::addLocalLabel() {
     int num = labels.getSize();
     labels.push_back(pos);
-    addOperation(new label(pos));
+    addOperation(new label(num));
     return num;
 }
 
-void AssemblyListing::interrupt(char int_num) {
+void AssemblyListing::interrupt(unsigned char int_num) {
     addOperation(new class interrupt(int_num));
 }
 
 void AssemblyListing::call(int functionId) {
+    requiredListings.push_back(functionId);
     addOperation(new class call(functionId));
 }
 
@@ -127,23 +149,107 @@ void AssemblyListing::idiv(REGISTER divisor) {
     addOperation(new idiv_reg(divisor));
 }
 
+void AssemblyListing::add(REGISTER to, REGISTER what) {
+    addOperation(new add_reg_reg(to, what));
+}
+
+void AssemblyListing::add(REGISTER to, int imm) {
+    addOperation(new add_reg_imm(to, imm));
+}
+
+void AssemblyListing::add(REGISTER ptr, char offset, int imm) {
+    addOperation(new add_rm_imm_off8(ptr, offset, imm));
+}
+
+void AssemblyListing::add(REGISTER ptr, int offset, int imm) {
+    addOperation(new add_rm_imm_off32(ptr, offset, imm));
+}
+
+void AssemblyListing::sub(REGISTER to, REGISTER what) {
+    addOperation(new sub_reg_reg(to, what));
+}
+
+void AssemblyListing::sub(REGISTER to, int imm) {
+    addOperation(new sub_reg_imm(to, imm));
+}
+
+void AssemblyListing::sub(REGISTER ptr, char offset, int imm) {
+    addOperation(new sub_rm_imm_off8(ptr, offset, imm));
+}
+
+void AssemblyListing::sub(REGISTER ptr, int offset, int imm) {
+    addOperation(new sub_rm_imm_off32(ptr, offset, imm));
+}
+
+void AssemblyListing::push(REGISTER reg) {
+    addOperation(new push_reg(reg));
+}
+
+void AssemblyListing::pop(REGISTER reg) {
+    addOperation(new pop_reg(reg));
+}
+
+void AssemblyListing::cmp(REGISTER fst, REGISTER snd) {
+    addOperation(new cmp_reg_reg(fst, snd));
+}
+
+void AssemblyListing::neg(REGISTER what) {
+    addOperation(new neg_reg(what));
+}
+
+void AssemblyListing::logical_and(REGISTER what, unsigned int imm) {
+    addOperation(new and_reg_imm(what, imm));
+}
+
+int AssemblyListing::getLabelCount() {
+    return labels.getSize();
+}
+
+
 AssemblyListing::~AssemblyListing() {
-    for(int i = 0; i < ops.getSize(); i++) {
+    for (int i = 0; i < ops.getSize(); i++) {
         delete ops[i];
     }
 }
 
 AssemblyListing::AssemblyListing() : ops(), labels(), pos(0) {}
 
-AssemblyListing::AssemblyListing(AssemblyListing &&other) noexcept {
-    std::swap(*this, other);
-}
+AssemblyListing::AssemblyListing(AssemblyListing &&other) noexcept : pos(other.pos), ops(std::move(other.ops)),
+                                                                     labels(std::move(other.labels)), requiredListings(
+                std::move(other.requiredListings)) {}
 
-AssemblyListing& AssemblyListing::operator=(AssemblyListing &&other) noexcept {
-    std::swap(*this, other);
+AssemblyListing &AssemblyListing::operator=(AssemblyListing &&other) noexcept {
+    pos = other.pos;
+    ops = std::move(other.ops);
+    labels = std::move(other.labels);
+    requiredListings = std::move(other.requiredListings);
+
+
     return *this;
 }
 
+int AssemblyListing::getSize() {
+    return pos;
+}
+
+void AssemblyListing::toNASM(FILE *output) {
+    for (int i = 0; i < ops.getSize(); i++) {
+        ops[i]->toNASM(output);
+    }
+}
+
+bool AssemblyListing::markRequiredFunctions(int *listingPositions) {
+    bool updated = false;
+
+    for (int i = 0; i < requiredListings.getSize(); i++) {
+        if (!listingPositions[requiredListings[i]]) {
+            listingPositions[requiredListings[i]] = ADDED;
+            updated = true;
+        }
+    }
+
+    return updated;
+}
 
 AssemblyProgram::AssemblyProgram() : listings(), main(0) {}
 
@@ -151,7 +257,7 @@ AssemblyProgram::AssemblyProgram(AssemblyProgram &&other) noexcept {
     swap(*this, other);
 }
 
-AssemblyProgram& AssemblyProgram::operator=(AssemblyProgram &&other) noexcept {
+AssemblyProgram &AssemblyProgram::operator=(AssemblyProgram &&other) noexcept {
     swap(*this, other);
     return *this;
 }
@@ -166,21 +272,67 @@ int AssemblyProgram::pushListing(AssemblyListing &&lst) {
     return listings.getSize() - 1;
 }
 
+int *AssemblyProgram::prepare() {
+    int *listingPositions = new int[listings.getSize()];
+
+    listingPositions[main] = ADDED;
+
+    bool modified = true;
+    while (modified) {                               // Mark functions that are required to run the program
+        modified = false;
+        for (int i = 0; i < listings.getSize(); i++) {
+            if (listingPositions[i] == ADDED) {
+                modified &= listings[i].markRequiredFunctions(listingPositions);
+                listingPositions[i] = PROCESSED;
+            }
+        }
+    }
+
+    int pos = 3;                        // In order to be valid
+
+    for (int i = 0; i < listings.getSize(); i++) {
+        if (listingPositions[i]) {
+//            listings[i].placeLocalLabelJumpOffsets();   // Better to relocate to AssemblyListing::toNASM, though it is not required for translation to nasm tbh
+            listingPositions[i] = pos;
+            pos += listings[i].getSize();
+        }
+    }
+
+    for (int i = 0; i < listings.getSize(); i++) {
+//        listings[i].placeCallOffsets(listingPositions);
+    }
+
+    return listingPositions;
+}
+
 void AssemblyProgram::toNASM(char *filename) {
     FILE *output = fopen(filename, "w");
 
-    if(!output)
+    if (!output)
         throw_exception("Unable to open file");
 
     fprintf(output, "SEGMENT .text\n"
-                            "GLOBAL _start\n\n"
-                            "_start:\n"
-                            "    call listing%d\n"
-                            "    mov eax, 1\n"
-                            "    xor ebx, ebx\n"
-                            "    int 80h\n\n", main);
+                    "GLOBAL _start\n\n"
+                    "_start:\n"
+                    "    call listing%d\n"
+                    "    mov eax, 1\n"
+                    "    xor ebx, ebx\n"
+                    "    int 80h\n\n", main);
 
+    int *listingPositions = prepare();
 
+    for (int i = 0; i < listings.getSize(); i++) {
+        if (listingPositions[i]) {
+            fprintf(output, "listing%d:\n", i);
+            listings[i].toNASM(output);
+            fprintf(output, "\n\n");
+        }
+    }
+    delete[] listingPositions;
+
+    // TODO deal with data section
+
+    fclose(output);
 }
 
 

@@ -13,6 +13,14 @@ HashTable.hpp
 /home/alexey/Programming/x86CompilerBackend/HashTable.hpp
 Vector.hpp
 /home/alexey/Programming/x86CompilerBackend/Vector.hpp
+AssemblyTools.hpp
+/home/alexey/Programming/x86CompilerBackend/AssemblyTools.hpp
+
+/home/alexey/Programming/x86CompilerBackend/AssemblyTools.hpp
+cstdio
+-
+Vector.hpp
+/home/alexey/Programming/x86CompilerBackend/Vector.hpp
 
 /home/alexey/Programming/x86CompilerBackend/HashTable.hpp
 cstring
@@ -25,6 +33,8 @@ cstddef
 -
 utility
 -
+utilities.hpp
+/home/alexey/Programming/x86CompilerBackend/utilities.hpp
 
 /home/alexey/Programming/x86CompilerBackend/main.cpp
 iostream
@@ -35,6 +45,8 @@ utilities.hpp
 /home/alexey/Programming/x86CompilerBackend/utilities.hpp
 AbstractSyntaxTree.hpp
 /home/alexey/Programming/x86CompilerBackend/AbstractSyntaxTree.hpp
+AssemblyTools.hpp
+/home/alexey/Programming/x86CompilerBackend/AssemblyTools.hpp
 
 /home/alexey/Programming/x86CompilerBackend/utilities.hpp
 exception

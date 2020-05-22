@@ -17,6 +17,16 @@
 					<DistClean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
 			<Target title="edit_cache">
 				<Option working_dir="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug"/>
 				<Option type="4"/>
@@ -71,94 +81,6 @@
 					<DistClean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="AbstractSyntaxTree">
-				<Option output="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/libAbstractSyntaxTree.a" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="2"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0/x86_64-pc-linux-gnu"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include-fixed"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 AbstractSyntaxTree"/>
-					<CompileFile command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="AbstractSyntaxTree/fast">
-				<Option output="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/libAbstractSyntaxTree.a" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="2"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0/x86_64-pc-linux-gnu"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include-fixed"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 AbstractSyntaxTree/fast"/>
-					<CompileFile command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="HashTable">
-				<Option output="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/libHashTable.a" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="2"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0/x86_64-pc-linux-gnu"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include-fixed"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 HashTable"/>
-					<CompileFile command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="HashTable/fast">
-				<Option output="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/libHashTable.a" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="2"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0/x86_64-pc-linux-gnu"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include-fixed"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 HashTable/fast"/>
-					<CompileFile command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
 			<Target title="Utilities">
 				<Option output="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/libUtilities.a" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug"/>
@@ -198,60 +120,6 @@
 				</Compiler>
 				<MakeCommands>
 					<Build command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 Utilities/fast"/>
-					<CompileFile command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="rebuild_cache">
-				<Option working_dir="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug"/>
-				<Option type="4"/>
-				<MakeCommands>
-					<Build command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="Vector">
-				<Option output="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/libVector.a" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="2"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0/x86_64-pc-linux-gnu"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include-fixed"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 Vector"/>
-					<CompileFile command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="Vector/fast">
-				<Option output="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/libVector.a" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/alexey/Programming/x86CompilerBackend/cmake-build-debug"/>
-				<Option object_output="./"/>
-				<Option type="2"/>
-				<Option compiler="gcc"/>
-				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0/x86_64-pc-linux-gnu"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/../../../../include/c++/9.3.0/backward"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include"/>
-					<Add directory="/usr/local/include"/>
-					<Add directory="/usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include-fixed"/>
-					<Add directory="/usr/include"/>
-				</Compiler>
-				<MakeCommands>
-					<Build command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 Vector/fast"/>
 					<CompileFile command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="make -j4 -f &quot;/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
@@ -302,29 +170,11 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/alexey/Programming/x86CompilerBackend/AbstractSyntaxTree.cpp">
-			<Option target="AbstractSyntaxTree"/>
-		</Unit>
-		<Unit filename="/home/alexey/Programming/x86CompilerBackend/AbstractSyntaxTree.hpp">
-			<Option target="AbstractSyntaxTree"/>
-		</Unit>
 		<Unit filename="/home/alexey/Programming/x86CompilerBackend/AssemblyTools.cpp">
 			<Option target="AssemblyTools"/>
 		</Unit>
 		<Unit filename="/home/alexey/Programming/x86CompilerBackend/AssemblyTools.hpp">
 			<Option target="AssemblyTools"/>
-		</Unit>
-		<Unit filename="/home/alexey/Programming/x86CompilerBackend/HashTable.cpp">
-			<Option target="HashTable"/>
-		</Unit>
-		<Unit filename="/home/alexey/Programming/x86CompilerBackend/HashTable.hpp">
-			<Option target="HashTable"/>
-		</Unit>
-		<Unit filename="/home/alexey/Programming/x86CompilerBackend/Vector.cpp">
-			<Option target="Vector"/>
-		</Unit>
-		<Unit filename="/home/alexey/Programming/x86CompilerBackend/Vector.hpp">
-			<Option target="Vector"/>
 		</Unit>
 		<Unit filename="/home/alexey/Programming/x86CompilerBackend/main.cpp">
 			<Option target="x86CompilerBackend"/>

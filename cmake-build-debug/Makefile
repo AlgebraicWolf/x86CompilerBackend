@@ -76,17 +76,6 @@ CMAKE_BINARY_DIR = /home/alexey/Programming/x86CompilerBackend/cmake-build-debug
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target edit_cache
-edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/usr/bin/cmake-gui -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : edit_cache
-
-# Special rule for the target edit_cache
-edit_cache/fast: edit_cache
-
-.PHONY : edit_cache/fast
-
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
@@ -97,6 +86,17 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 
 .PHONY : rebuild_cache/fast
+
+# Special rule for the target edit_cache
+edit_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
+	/usr/bin/cmake-gui -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : edit_cache
+
+# Special rule for the target edit_cache
+edit_cache/fast: edit_cache
+
+.PHONY : edit_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -144,32 +144,6 @@ x86CompilerBackend/fast:
 .PHONY : x86CompilerBackend/fast
 
 #=============================================================================
-# Target rules for targets named AbstractSyntaxTree
-
-# Build rule for target.
-AbstractSyntaxTree: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AbstractSyntaxTree
-.PHONY : AbstractSyntaxTree
-
-# fast build rule for target.
-AbstractSyntaxTree/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbstractSyntaxTree.dir/build.make CMakeFiles/AbstractSyntaxTree.dir/build
-.PHONY : AbstractSyntaxTree/fast
-
-#=============================================================================
-# Target rules for targets named HashTable
-
-# Build rule for target.
-HashTable: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 HashTable
-.PHONY : HashTable
-
-# fast build rule for target.
-HashTable/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/HashTable.dir/build.make CMakeFiles/HashTable.dir/build
-.PHONY : HashTable/fast
-
-#=============================================================================
 # Target rules for targets named Utilities
 
 # Build rule for target.
@@ -183,19 +157,6 @@ Utilities/fast:
 .PHONY : Utilities/fast
 
 #=============================================================================
-# Target rules for targets named Vector
-
-# Build rule for target.
-Vector: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Vector
-.PHONY : Vector
-
-# fast build rule for target.
-Vector/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Vector.dir/build.make CMakeFiles/Vector.dir/build
-.PHONY : Vector/fast
-
-#=============================================================================
 # Target rules for targets named AssemblyTools
 
 # Build rule for target.
@@ -207,33 +168,6 @@ AssemblyTools: cmake_check_build_system
 AssemblyTools/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/AssemblyTools.dir/build.make CMakeFiles/AssemblyTools.dir/build
 .PHONY : AssemblyTools/fast
-
-AbstractSyntaxTree.o: AbstractSyntaxTree.cpp.o
-
-.PHONY : AbstractSyntaxTree.o
-
-# target to build an object file
-AbstractSyntaxTree.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbstractSyntaxTree.dir/build.make CMakeFiles/AbstractSyntaxTree.dir/AbstractSyntaxTree.cpp.o
-.PHONY : AbstractSyntaxTree.cpp.o
-
-AbstractSyntaxTree.i: AbstractSyntaxTree.cpp.i
-
-.PHONY : AbstractSyntaxTree.i
-
-# target to preprocess a source file
-AbstractSyntaxTree.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbstractSyntaxTree.dir/build.make CMakeFiles/AbstractSyntaxTree.dir/AbstractSyntaxTree.cpp.i
-.PHONY : AbstractSyntaxTree.cpp.i
-
-AbstractSyntaxTree.s: AbstractSyntaxTree.cpp.s
-
-.PHONY : AbstractSyntaxTree.s
-
-# target to generate assembly for a file
-AbstractSyntaxTree.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/AbstractSyntaxTree.dir/build.make CMakeFiles/AbstractSyntaxTree.dir/AbstractSyntaxTree.cpp.s
-.PHONY : AbstractSyntaxTree.cpp.s
 
 AssemblyTools.o: AssemblyTools.cpp.o
 
@@ -261,60 +195,6 @@ AssemblyTools.s: AssemblyTools.cpp.s
 AssemblyTools.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/AssemblyTools.dir/build.make CMakeFiles/AssemblyTools.dir/AssemblyTools.cpp.s
 .PHONY : AssemblyTools.cpp.s
-
-HashTable.o: HashTable.cpp.o
-
-.PHONY : HashTable.o
-
-# target to build an object file
-HashTable.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/HashTable.dir/build.make CMakeFiles/HashTable.dir/HashTable.cpp.o
-.PHONY : HashTable.cpp.o
-
-HashTable.i: HashTable.cpp.i
-
-.PHONY : HashTable.i
-
-# target to preprocess a source file
-HashTable.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/HashTable.dir/build.make CMakeFiles/HashTable.dir/HashTable.cpp.i
-.PHONY : HashTable.cpp.i
-
-HashTable.s: HashTable.cpp.s
-
-.PHONY : HashTable.s
-
-# target to generate assembly for a file
-HashTable.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/HashTable.dir/build.make CMakeFiles/HashTable.dir/HashTable.cpp.s
-.PHONY : HashTable.cpp.s
-
-Vector.o: Vector.cpp.o
-
-.PHONY : Vector.o
-
-# target to build an object file
-Vector.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Vector.dir/build.make CMakeFiles/Vector.dir/Vector.cpp.o
-.PHONY : Vector.cpp.o
-
-Vector.i: Vector.cpp.i
-
-.PHONY : Vector.i
-
-# target to preprocess a source file
-Vector.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Vector.dir/build.make CMakeFiles/Vector.dir/Vector.cpp.i
-.PHONY : Vector.cpp.i
-
-Vector.s: Vector.cpp.s
-
-.PHONY : Vector.s
-
-# target to generate assembly for a file
-Vector.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Vector.dir/build.make CMakeFiles/Vector.dir/Vector.cpp.s
-.PHONY : Vector.cpp.s
 
 main.o: main.cpp.o
 
@@ -378,24 +258,12 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... AbstractSyntaxTree"
 	@echo "... AssemblyTools"
-	@echo "... HashTable"
 	@echo "... Utilities"
-	@echo "... Vector"
 	@echo "... x86CompilerBackend"
-	@echo "... AbstractSyntaxTree.o"
-	@echo "... AbstractSyntaxTree.i"
-	@echo "... AbstractSyntaxTree.s"
 	@echo "... AssemblyTools.o"
 	@echo "... AssemblyTools.i"
 	@echo "... AssemblyTools.s"
-	@echo "... HashTable.o"
-	@echo "... HashTable.i"
-	@echo "... HashTable.s"
-	@echo "... Vector.o"
-	@echo "... Vector.i"
-	@echo "... Vector.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

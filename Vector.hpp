@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <utility>
+#include "utilities.hpp"
 
 template <typename T>
 class vector {
@@ -37,13 +38,22 @@ vector<T>::vector(size_t capacity) : capacity(capacity), size(0) {
 }
 
 template<typename T>
-vector<T>::vector(vector<T> &&other) {
-    swap(*this, other);
+vector<T>::vector(vector<T> &&other) : size(other.size), capacity(other.capacity), elems(other.elems) {
+    other.size = 0;
+    other.capacity = 0;
+    other.elems = nullptr;
 }
 
 template<typename T>
 vector<T>& vector<T>::operator=(vector<T> &&other) {
-    swap(*this, other);
+    size = other.size;
+    capacity = other.capacity;
+    elems = other.elems;
+
+    other.size = 0;
+    other.capacity = 0;
+    other.elems = nullptr;
+
     return *this;
 }
 
@@ -58,12 +68,11 @@ void vector<T>::reserve(size_t newSize) {
         return;
 
     T* newElems = new T[newSize];
-
     for (int i = 0; i < size; i++) {
         new(newElems + i) T(std::move(elems[i]));
     }
 
-    delete[] reinterpret_cast<const char *>(elems);
+    delete[] elems;
 
     elems = newElems;
     capacity = newSize;
@@ -74,7 +83,7 @@ void vector<T>::push_back(T&& elem) {
     if(size == capacity)
         reserve(2 * capacity);
 
-    new(elems + size) T(elem);
+    new(elems + size) T(forward<T>(elem));
     size++;
 }
 

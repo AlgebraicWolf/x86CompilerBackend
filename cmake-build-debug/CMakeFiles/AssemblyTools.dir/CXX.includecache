@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/alexey/Programming/x86CompilerBackend/AssemblyTools.cpp
+AssemblyTools.hpp
+/home/alexey/Programming/x86CompilerBackend/AssemblyTools.hpp
+utilities.hpp
+/home/alexey/Programming/x86CompilerBackend/utilities.hpp
+
+/home/alexey/Programming/x86CompilerBackend/AssemblyTools.hpp
+cstdio
+-
+Vector.hpp
+/home/alexey/Programming/x86CompilerBackend/Vector.hpp
+
+/home/alexey/Programming/x86CompilerBackend/Vector.hpp
+cstddef
+-
+utility
+-
+utilities.hpp
+/home/alexey/Programming/x86CompilerBackend/utilities.hpp
+
+/home/alexey/Programming/x86CompilerBackend/utilities.hpp
+exception
+-
+cstdio
+-
+

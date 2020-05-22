@@ -100,9 +100,6 @@ x86CompilerBackend_EXTERNAL_OBJECTS =
 x86CompilerBackend: CMakeFiles/x86CompilerBackend.dir/main.cpp.o
 x86CompilerBackend: CMakeFiles/x86CompilerBackend.dir/build.make
 x86CompilerBackend: libUtilities.a
-x86CompilerBackend: libHashTable.a
-x86CompilerBackend: libVector.a
-x86CompilerBackend: libAbstractSyntaxTree.a
 x86CompilerBackend: libAssemblyTools.a
 x86CompilerBackend: CMakeFiles/x86CompilerBackend.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/alexey/Programming/x86CompilerBackend/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable x86CompilerBackend"

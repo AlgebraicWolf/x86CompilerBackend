@@ -9,6 +9,7 @@
 #include "utilities.hpp"
 #include "HashTable.hpp"
 #include "Vector.hpp"
+#include "AssemblyTools.hpp"
 
 const int DEFAULT_BUCKET_SIZE = 32;
 
@@ -54,11 +55,19 @@ private:
     NODE_TYPE getType(const char *serialized);
 
     const char *serializeType();
+    void parseLocalVariables(int &alloc,
+                             int *offsets);                                         // Count local variables and determine their offsets
+    void
+    parseArguments(int *offsets, int depth);                                        // Determine offsets for function arguments
+
+    void compileOperation(AssemblyListing &func, int *numbers, int *offsets);       // Compile Operation node
+    void compileExpression(AssemblyListing &func, int *numbers, int *offsets);      // Compile expression subtree
+    int pushVarlist(AssemblyListing &func, int *numbers, int *offsets);             // Push function arguments into stack
 
 public:
     AbstractSyntaxNode();                                                       // Default constructor
     const char *deserialize(const char *serialized, HashTable<CRC32CFunctor, DEFAULT_BUCKET_SIZE> &ids,
-                            vector<const char *> &string_ids);                        // Deserialization
+                            vector<const char *> &string_ids);                  // Deserialization
     AbstractSyntaxNode(const AbstractSyntaxNode &other) = delete;               // Copy constructor
     AbstractSyntaxNode &operator=(const AbstractSyntaxNode &other) = delete;    // Copy assignment
     AbstractSyntaxNode(AbstractSyntaxNode &&other) noexcept;                    // Move constructor
@@ -66,6 +75,15 @@ public:
     ~AbstractSyntaxNode();                                                      // Destructor
 
     NODE_TYPE getNodeType();                                                    // Node type getter
+    AbstractSyntaxNode *getRight();
+
+    AbstractSyntaxNode *getLeft();
+
+    AssemblyListing compileFunction(int *numbers,
+                                    int idsSize);                              // Function compiler (Should start only in function node)
+
+    int getID();
+
     void dump(FILE *out);                                                       // Dump node
 };
 
@@ -77,9 +95,13 @@ private:
     AbstractSyntaxNode *root;                                                   // Tree root
     void reset();                                                               // Empty the tree
 public:
+    int *
+    functionIDtoNumber();                                                       // Perform simple traversal and determine listing ID for each function
+    AssemblyProgram compile();                                                  // Translate program into assembly
+
     AbstractSyntaxTree();                                                       // Default constructor
     void load(const char *filename);                                            // Load tree from file
-    AbstractSyntaxTree &operator=(AbstractSyntaxTree &&other) noexcept;        // Move assignment operator
+    AbstractSyntaxTree &operator=(AbstractSyntaxTree &&other) noexcept;         // Move assignment operator
     AbstractSyntaxTree(AbstractSyntaxTree &&other) noexcept;                    // Move constructor
     AbstractSyntaxTree(const AbstractSyntaxTree &other) = delete;               // Prohibit copy construction
     AbstractSyntaxTree &operator=(const AbstractSyntaxTree &other) = delete;    // Prohibit copy assignment
@@ -87,6 +109,316 @@ public:
 
     void dump(const char *filename);                                            // Dump tree into text file
 };
+
+void AbstractSyntaxNode::parseLocalVariables(int &alloc, int *offsets) {
+    if (type == VAR) {
+        alloc++;
+        offsets[id] = alloc * (-4);
+    }
+
+    if (right)
+        right->parseLocalVariables(alloc, offsets);
+
+    if (left)
+        left->parseLocalVariables(alloc, offsets);
+}
+
+void AbstractSyntaxNode::parseArguments(int *offsets, int depth) {
+    if (type != VARLIST)
+        throw_exception("Parsing arguments in non-varlist node");
+
+    if (right) {
+        depth++;
+        offsets[right->id] = 4 * depth;
+        if (left)
+            left->parseArguments(offsets, depth);
+    }
+}
+
+int AbstractSyntaxNode::pushVarlist(AssemblyListing &func, int *numbers, int *offsets) {
+    if(type != VARLIST)
+        throw_exception("Trying to push arguments in non-varlist node");
+
+    if(right) {
+        int pushed = 0;
+        if(left) {
+            pushed = left->pushVarlist(func, numbers, offsets);
+        }
+
+        right->compileExpression(func, numbers, offsets);
+        func.push(EAX);
+        return pushed + 1;
+    }
+
+    return 0;
+}
+
+void AbstractSyntaxNode::compileExpression(AssemblyListing &func, int *numbers, int *offsets) {
+    if(type == CALL) {
+        int vars = right->pushVarlist(func, numbers, offsets);
+        func.call(numbers[left->id]);
+        func.add(ESP, vars * 4);
+        return;
+    }
+
+    if(right) {
+        right->compileExpression(func, numbers, offsets); // If right subtree is present, execute it. Result is stored in EAX
+
+    }
+
+    if(left) {
+        func.push(EAX); // Save result
+        left->compileExpression(func, numbers, offsets); // If left subtree is present, execute it. Result stored in EBX
+        func.pop(EBX);
+    }
+
+
+
+
+    switch(type) {
+        case ADD:
+            func.add(EAX, EBX);
+            break;
+
+        case SUB:
+            func.sub(EAX, EBX);
+            break;
+
+        case SQRT:
+            throw_exception("SQRT is not yet implemented");
+            break;
+
+        case MUL:
+            func.imul(EBX);
+            break;
+
+        case DIV:
+            func.idiv(EBX);
+            break;
+
+        case ID:
+            func.mov(EAX, EBP, offsets[id]);
+            break;
+
+        case NUM:
+            func.mov(EAX, id);
+            break;
+
+        default:
+            throw_exception("Invalid node type during expression compilation");
+            break;
+    }
+}
+
+
+
+void AbstractSyntaxNode::compileOperation(AssemblyListing &func, int *numbers, int *offsets) {
+    if(type != OP)
+        throw_exception("Trying to compile non-operation node as operation one");
+
+
+    switch (right->type) {
+        case INPUT:
+            func.call(0);
+            func.mov(EBP, offsets[right->right->id], EAX);
+            break;
+
+        case OUTPUT:
+            right->right->compileExpression(func, numbers, offsets);
+            func.call(1);
+            break;
+
+        case IF:
+            if(!(right->left->type == EQUAL || right->left->type == ABOVE || right->left->type == EQUAL))
+                throw_exception("Invalid comparison node while compiling IF statement");
+            {
+                int labelCount = func.getLabelCount();
+                right->left->left->compileExpression(func, numbers, offsets);
+                func.push(EAX);
+                right->left->right->compileExpression(func, numbers, offsets);
+                func.pop(EBX);
+                func.cmp(EAX, EBX);
+                switch(right->left->type) {
+                    case EQUAL:
+                        func.jne(labelCount);
+                        break;
+
+                    case ABOVE:
+                        func.jge(labelCount);
+                        break;
+
+                    case BELOW:
+                        func.jle(labelCount);
+                        break;
+                }
+                right->right->right->right->compileOperation(func, numbers, offsets);
+                if(right->right->left) { // ELSE branch is present
+                    func.jmp(labelCount + 1); // DO NOT execute ELSE branch if statement is true
+                    func.addLocalLabel(); // ELSE branch label
+                    right->right->left->right->compileOperation(func, numbers, offsets); // compile ELSE branch
+                    func.addLocalLabel(); // End of if label
+                } else {
+                    func.addLocalLabel(); // End of IF statement
+                }
+            }
+            break;
+
+        case ASSIGN:
+            right->right->compileExpression(func, numbers, offsets);
+            func.mov(EBP, offsets[right->left->id], EAX);
+            break;
+
+        case VAR:
+            break;
+
+        case WHILE:
+            if(!(right->left->type == EQUAL || right->left->type == ABOVE || right->left->type == EQUAL))
+                throw_exception("Invalid comparison node while compiling WHILE statement");
+            {
+
+                int labelCount = func.addLocalLabel(); // Label before check -- Start of the loop
+                right->left->left->compileExpression(func, numbers, offsets); // First operand
+                func.push(EAX);
+                right->left->right->compileExpression(func, numbers, offsets); // Second operand
+                func.pop(EBX);
+
+                switch (right->left->type) {
+                    case EQUAL:
+                        func.jne(labelCount + 1);
+                        break;
+
+                    case ABOVE:
+                        func.jge(labelCount + 1);
+                        break;
+
+                    case BELOW:
+                        func.jle(labelCount + 1);
+                        break;
+                }
+
+                right->right->right->compileOperation(func, numbers, offsets); // Compile loop body
+                func.jmp(labelCount); // Go back to the check
+                func.addLocalLabel(); // End of loop
+            }
+            break;
+
+        case RETURN:
+            right->right->compileExpression(func, numbers, offsets);
+            func.mov(ESP, EBP); // Restore old stack pointer i. e. deallocate everything
+            func.pop(EBP); // Restore old stack frame
+            func.ret();
+            break;
+
+        default:
+            break;
+    }
+
+    if(left)
+        left->compileOperation(func, numbers, offsets);
+}
+
+AssemblyListing AbstractSyntaxNode::compileFunction(int *numbers, int idsSize) {
+    if (type != DEF)
+        throw_exception("Function compilation started from non-function node");
+
+    AssemblyListing function;  // Create listing for current function
+    function.push(EBP); // Preserve caller stack frame
+    function.mov(EBP, ESP); // Create stack frame
+
+    int *offsets = new int[idsSize](); // Array for offsets
+    int alloc = 0; // Number of variables to allocate
+    parseLocalVariables(alloc, offsets); // Parse all the local variables
+    left->parseArguments(offsets, 1); // Parse arguments
+
+    function.sub(ESP, alloc * 4); // Allocate space for local variables
+
+    right->right->right->compileOperation(function, numbers, offsets);
+
+    function.mov(ESP, EBP); // Restore old stack pointer i. e. deallocate everything
+    function.pop(EBP); // Restore old stack frame
+    function.ret();
+    return function;
+}
+
+AssemblyProgram AbstractSyntaxTree::compile() {
+    int *numbers = functionIDtoNumber(); // Translate function IDs into listing numbers for further use
+
+    AssemblyProgram prog; // Create assembly program
+
+    AbstractSyntaxNode *current = root->getRight(); // Start from the first definition
+
+    AssemblyListing input; // Input function listing
+    input.ret();
+
+    AssemblyListing output; // Output function listing
+    output.mov(EDX, 0); // Zero in edx
+    output.sub(ESP, 14); // Eleven character max, extra padding bcause i am lazy
+    output.mov(EBX, EAX);
+    output.logical_and(EBX, 0x80000000);
+    output.cmp(EBX,EDX); // Check wheter integer is negative
+    output.mov(ECX, ESP); // Pointer
+    output.je(0); // If it is, skip part with neg sign
+
+    output.mov(ECX, 0, '-');
+    output.inc(ECX);
+
+    output.addLocalLabel(); // Actual rendering
+    output.cmp(EAX, EDX);
+    output.je(1);
+    output.mov(EBX, 10);
+    output.idiv(EBX); // Divide EDX:EAX by EBX
+    output.add(EDX, 48); // Turn it into character
+    output.mov(ECX, 0, EDX); // Move character to stack
+    output.inc(ECX); // Go to the next character
+    output.mov(EDX, 0); // Free EDX
+    output.jmp(0); // And the cycle continues
+
+    output.addLocalLabel(); // End of rendering
+    output.sub(ECX, ESP); // Count symbols
+    output.mov(EBX, ECX); // Proper position
+    output.mov(EAX, 4); // sys_write
+    output.mov(EBX, ESP); // Buffer position
+    output.interrupt(0x80); // Call interrupt
+    output.add(ESP, 14); // Clear stack
+    output.ret(); // Return
+
+    prog.pushListing(std::move(input));
+    prog.pushListing(std::move(output));
+
+    while (current) { // Traverse through all the functions and compile them as listings
+        prog.pushListing(current->getRight()->compileFunction(numbers,
+                                                              string_ids.getSize())); // Translate function into asm listing
+        current = current->getLeft(); // Proceed to the next function
+    }
+    prog.setMainListing(numbers[IDs.Get("main")]);
+    delete[] numbers;
+    return prog;
+}
+
+
+AbstractSyntaxNode *AbstractSyntaxNode::getLeft() {
+    return left;
+}
+
+AbstractSyntaxNode *AbstractSyntaxNode::getRight() {
+    return right;
+}
+
+int AbstractSyntaxNode::getID() {
+    return id;
+}
+
+int *AbstractSyntaxTree::functionIDtoNumber() {
+    int *numbers = new int[string_ids.getSize()]();
+    int cur = 2; // Leave space for itoa and atoi
+    AbstractSyntaxNode *current = root->getRight();
+    while (current && current->getNodeType() == D) {
+        numbers[current->getRight()->getRight()->getID()] = cur++;
+        current = current->getLeft();
+    }
+
+    return numbers;
+}
 
 const char *
 AbstractSyntaxNode::deserialize(const char *serialized, HashTable<CRC32CFunctor, 32> &ids,
@@ -406,18 +738,19 @@ void AbstractSyntaxTree::dump(const char *filename) {
 }
 
 void AbstractSyntaxNode::dump(FILE *out) {
-    fprintf(out, "node%p[shape=record, label=\"TYPE: %s | id: %d\"];\n", this, serializeType(), id);
+    fprintf(out, "node%p[shape=record, label=\"{TYPE: %s | id: %d | {<l> left | <r> right}}\"];\n", this,
+            serializeType(), id);
 
     if (parent)
         fprintf(out, "node%p -> node%p;\n", this, parent);
 
     if (left) {
-        fprintf(out, "node%p -> node%p;\n", this, left);
+        fprintf(out, "node%p:l -> node%p;\n", this, left);
         left->dump(out);
     }
 
     if (right) {
-        fprintf(out, "node%p -> node%p;\n", this, right);
+        fprintf(out, "node%p:r -> node%p;\n", this, right);
         right->dump(out);
     }
 }

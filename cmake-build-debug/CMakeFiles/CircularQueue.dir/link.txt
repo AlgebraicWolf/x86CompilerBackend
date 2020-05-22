@@ -1,0 +1,2 @@
+/usr/bin/ar qc libCircularQueue.a  CMakeFiles/CircularQueue.dir/CircularQueue.cpp.o
+/usr/bin/ranlib libCircularQueue.a
