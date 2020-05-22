@@ -94,6 +94,9 @@ private:
     vector<const char *> string_ids;                                                  // Vector for string literals
     AbstractSyntaxNode *root;                                                   // Tree root
     void reset();                                                               // Empty the tree
+    AssemblyListing getOutputFunction();                                        // Generate output function
+    AssemblyListing getInputFunction();                                         // Generate input function
+
 public:
     int *
     functionIDtoNumber();                                                       // Perform simple traversal and determine listing ID for each function
@@ -340,6 +343,97 @@ AssemblyListing AbstractSyntaxNode::compileFunction(int *numbers, int idsSize) {
     return function;
 }
 
+AssemblyListing AbstractSyntaxTree::getOutputFunction() {
+    AssemblyListing output; // Output function listing
+
+    output.mov(ESI, EAX);
+    output.mov(EDX, 0); // Zero in edx
+    output.mov(ECX, ESP); // Old pointer
+
+    output.dec(ESP);
+    output.mov(ESP, 0, '\n'); // Line break
+
+    output.cmp(EAX, EDX); // Check whether integer is negative
+
+    output.jge(0); // If it is, skip neg
+    output.neg(EAX);
+
+    output.addLocalLabel(); // Actual rendering
+    output.mov(EBX, 10);
+    output.idiv(EBX); // Divide EDX:EAX by EBX
+    output.add(EDX, 48); // Turn it into character
+    output.dec(ESP);
+    output.mov(ESP, 0, DL);
+    output.mov(EDX, 0); // Free EDX
+    output.cmp(EAX, EDX); // Check whether it is over
+    output.jne(0); // Continue if it is not over
+
+
+    output.cmp(ESI, EDX); // Check whether it is negative
+
+    output.jge(1); // If it is not, skip part with neg sign
+    output.dec(ESP);
+    output.mov(ESP, 0, '-');
+
+    output.addLocalLabel(); // Writing process
+    output.mov(EDX, ECX);
+    output.sub(EDX, ESP); // Calculating length
+
+    output.mov(EAX, 4); // sys_write
+    output.mov(EBX, 1); // FD - STDOUT
+    output.mov(ECX, ESP); // Buffer position
+    output.interrupt(0x80); // Call interrupt
+    output.add(ESP, EDX); // Clear stack
+    output.ret(); // Return
+
+    return output;
+}
+
+AssemblyListing AbstractSyntaxTree::getInputFunction() {
+    AssemblyListing input;
+    input.push(EBP); // I want one more free register
+    input.mov(EBP, 0);
+
+    input.mov(ESI, 0); // Start from zero
+    input.mov(EDI, 10); // Base
+
+    input.sub(ESP, 4); // Allocate four bytes bcause I am lazy
+
+    input.mov(EBX, 0); // STDIN descriptor
+    input.mov(ECX, ESP); // Buffer address
+
+    input.addLocalLabel(); // Reading loop starts here
+    input.mov(EAX, 3); // sys_read()
+    input.mov(EDX, 1); // Amount of characters to read
+    input.interrupt(0x80); // Call function
+
+    input.mov(EAX, ESP, 0); // Load character
+    input.cmp(EAX, '\n'); // Compare with '\n'
+    input.je(2); // If it is equal, leave the loop
+    input.cmp(EAX, '-'); // If it is not negative
+    input.jne(1); // Skip sign switching flag
+    input.mov(EBP, 1); // Set flag for latter sign switching
+    input.jmp(0); // Proceed reading
+    input.addLocalLabel(); // End of sign switching
+    input.mov(EAX, ESI); // Get result to eax
+    input.imul(EDI); // Multiply by 10
+    input.mov(ESI, ESP, 0);
+    input.sub(ESI, 48);
+    input.add(ESI, EAX);
+    input.jmp(0);
+
+    input.addLocalLabel(); // End of input
+    input.cmp(EBP, 0); // Check whether it is required to change sign
+    input.je(3); // Skip switching if required
+    input.neg(ESI);
+    input.addLocalLabel(); // End of switching sign
+    input.add(ESP, 4); // Free memory
+    input.pop(EBP); // Restore EBP
+    input.mov(EAX, ESI); // Move result into EAX
+    input.ret(); // Return
+    return input;
+}
+
 AssemblyProgram AbstractSyntaxTree::compile() {
     int *numbers = functionIDtoNumber(); // Translate function IDs into listing numbers for further use
 
@@ -347,43 +441,8 @@ AssemblyProgram AbstractSyntaxTree::compile() {
 
     AbstractSyntaxNode *current = root->getRight(); // Start from the first definition
 
-    AssemblyListing input; // Input function listing
-    input.ret();
-
-    AssemblyListing output; // Output function listing
-    output.mov(EDX, 0); // Zero in edx
-    output.sub(ESP, 14); // Eleven character max, extra padding bcause i am lazy
-    output.mov(EBX, EAX);
-    output.logical_and(EBX, 0x80000000);
-    output.cmp(EBX,EDX); // Check wheter integer is negative
-    output.mov(ECX, ESP); // Pointer
-    output.je(0); // If it is, skip part with neg sign
-
-    output.mov(ECX, 0, '-');
-    output.inc(ECX);
-
-    output.addLocalLabel(); // Actual rendering
-    output.cmp(EAX, EDX);
-    output.je(1);
-    output.mov(EBX, 10);
-    output.idiv(EBX); // Divide EDX:EAX by EBX
-    output.add(EDX, 48); // Turn it into character
-    output.mov(ECX, 0, EDX); // Move character to stack
-    output.inc(ECX); // Go to the next character
-    output.mov(EDX, 0); // Free EDX
-    output.jmp(0); // And the cycle continues
-
-    output.addLocalLabel(); // End of rendering
-    output.sub(ECX, ESP); // Count symbols
-    output.mov(EBX, ECX); // Proper position
-    output.mov(EAX, 4); // sys_write
-    output.mov(EBX, ESP); // Buffer position
-    output.interrupt(0x80); // Call interrupt
-    output.add(ESP, 14); // Clear stack
-    output.ret(); // Return
-
-    prog.pushListing(std::move(input));
-    prog.pushListing(std::move(output));
+    prog.pushListing(getInputFunction());
+    prog.pushListing(getOutputFunction());
 
     while (current) { // Traverse through all the functions and compile them as listings
         prog.pushListing(current->getRight()->compileFunction(numbers,

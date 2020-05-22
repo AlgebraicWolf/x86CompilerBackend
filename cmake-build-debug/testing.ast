@@ -1,0 +1,1 @@
+{ PROGRAM_ROOT { @ } { DECLARATION { @ } { FUNCTION { VARLIST } { main { @ } { BLOCK { @ } { OP { OP { OP { @ } { OUTPUT { @ } { test } } } { ASSIGN { test } { 4417 } } } { INITIALIZE { @ } { test } } } } } } } }

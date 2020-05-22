@@ -20,6 +20,7 @@ constexpr const char *regToText(REGISTER reg) {
         CASE_REGNAME(ESP);
         CASE_REGNAME(ESI);
         CASE_REGNAME(EDI);
+        CASE_REGNAME(DL);
     }
     return "INVALID_REG";
 }
@@ -191,6 +192,10 @@ void AssemblyListing::pop(REGISTER reg) {
 
 void AssemblyListing::cmp(REGISTER fst, REGISTER snd) {
     addOperation(new cmp_reg_reg(fst, snd));
+}
+
+void AssemblyListing::cmp(REGISTER fst, int snd) {
+    addOperation(new cmp_reg_imm(fst, snd));
 }
 
 void AssemblyListing::neg(REGISTER what) {

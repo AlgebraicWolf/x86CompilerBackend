@@ -16,7 +16,8 @@ enum REGISTER {
     EBP,
     ESP,
     ESI,
-    EDI
+    EDI,
+    DL
 };
 
 constexpr const char *regToText(REGISTER reg);
@@ -167,7 +168,7 @@ public:
     mov_rm_imm8_off8(REGISTER rmreg, char offset, char imm) : rmreg(rmreg), offset(offset), imm(imm) {}
 
     virtual void toNASM(FILE *output) {
-        fprintf(output, "    mov [%s%+d], %d\n", regToText(rmreg), offset, imm);
+        fprintf(output, "    mov byte [%s%+d], %d\n", regToText(rmreg), offset, imm);
     }
 
     virtual void toBytecode(Bytecode buf) {
@@ -816,6 +817,26 @@ public:
     }
 };
 
+class cmp_reg_imm : public Operation {
+private:
+    REGISTER first;
+    int second;
+public:
+    cmp_reg_imm(REGISTER first, int second) : first(first), second(second) {}
+
+    virtual void toNASM(FILE *output) {
+        fprintf(output, "    cmp %s, %d\n", regToText(first), second);
+    }
+
+    virtual void toBytecode(Bytecode buf) {
+
+    }
+
+    virtual int getSize() {
+        return 2;
+    }
+};
+
 class neg_reg : public Operation {
 private:
     REGISTER what;
@@ -915,6 +936,7 @@ public:
     void comment(const char *msg);                                  // Insert comment
 
     void cmp(REGISTER fst, REGISTER snd);                           // cmp fst, snd
+    void cmp(REGISTER fst, int snd);                           // cmp fst, snd
 
     void jmp(int labelId);                                          // jmp labelId
     void jg(int labelId);                                           // jg labelId

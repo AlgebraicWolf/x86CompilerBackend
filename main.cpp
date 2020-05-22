@@ -8,10 +8,9 @@
 int main() {
     AbstractSyntaxTree prog;
     prog.load("input.ast");
-    prog.dump("out.dot");
 
     AssemblyProgram compiled = prog.compile();
-    compiled.toNASM("test.asm");
+    compiled.toNASM("fact.asm");
 
     return 0;
 }
