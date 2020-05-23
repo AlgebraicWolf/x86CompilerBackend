@@ -287,19 +287,21 @@ int *AssemblyProgram::prepare() {
         modified = false;
         for (int i = 0; i < listings.getSize(); i++) {
             if (listingPositions[i] == ADDED) {
-                modified &= listings[i].markRequiredFunctions(listingPositions);
+                modified |= listings[i].markRequiredFunctions(listingPositions);
                 listingPositions[i] = PROCESSED;
             }
         }
     }
 
-    int pos = 3;                        // In order to be valid
+    int pos = 0;                        // Calculate position of each listing
 
     for (int i = 0; i < listings.getSize(); i++) {
         if (listingPositions[i]) {
 //            listings[i].placeLocalLabelJumpOffsets();   // Better to relocate to AssemblyListing::toNASM, though it is not required for translation to nasm tbh
             listingPositions[i] = pos;
             pos += listings[i].getSize();
+        } else {
+            listingPositions[i] = -1;
         }
     }
 
@@ -327,7 +329,7 @@ void AssemblyProgram::toNASM(char *filename) {
     int *listingPositions = prepare();
 
     for (int i = 0; i < listings.getSize(); i++) {
-        if (listingPositions[i]) {
+        if (listingPositions[i] != -1) {
             fprintf(output, "listing%d:\n", i);
             listings[i].toNASM(output);
             fprintf(output, "\n\n");

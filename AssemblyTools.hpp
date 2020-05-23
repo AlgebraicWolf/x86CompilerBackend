@@ -10,14 +10,21 @@
 
 enum REGISTER {
     EAX,
-    EBX,
     ECX,
     EDX,
-    EBP,
+    EBX,
     ESP,
+    EBP,
     ESI,
     EDI,
-    DL
+    AL,
+    CL,
+    DL,
+    BL,
+    AH,
+    CH,
+    DH,
+    BH
 };
 
 constexpr const char *regToText(REGISTER reg);
@@ -51,7 +58,38 @@ constexpr const char *regToText(REGISTER reg);
 
 
 class Bytecode {
+private:
+    vector<unsigned char> bytecode;
+public:
+    Bytecode() : bytecode() {}
 
+    void append(unsigned char byte) {
+        bytecode.push_back(byte);
+    }
+
+    void append_byte(unsigned char byte) {
+        bytecode.push_back(byte);
+    }
+
+    void append(unsigned int dword) {
+        bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[3]);
+        bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[2]);
+        bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[1]);
+        bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[0]);
+    }
+
+    void append(unsigned short dword) {
+        bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[1]);
+        bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[0]);
+    }
+
+    void append(char byte) {
+        bytecode.push_back(*reinterpret_cast<unsigned char *>(&byte));
+    }
+
+    void append(int dword) {
+        bytecode.push_back(*reinterpret_cast<unsigned int *>(&dword));
+    }
 };
 
 class Operation {
@@ -59,7 +97,7 @@ private:
 
 public:
     virtual void toNASM(FILE *output) = 0;                          // Translate instruction to NASM
-    virtual void toBytecode(Bytecode buf) = 0;                      // Translate instruction to bytecode
+    virtual void toBytecode(Bytecode &buf) = 0;                      // Translate instruction to bytecode
     virtual int getSize() = 0;                                      // Length of command in bytes
     virtual ~Operation() = default;
 };
@@ -70,8 +108,8 @@ public:
         fprintf(output, "    nop\n");
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        buf.append_byte(0x90); // NOP instruction code
     }
 
     virtual int getSize() {
@@ -89,8 +127,9 @@ public:
         fprintf(output, "    int %u\n", int_num);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        buf.append_byte(0xcd);
+        buf.append(int_num);
     }
 
     virtual int getSize() {
@@ -109,8 +148,13 @@ public:
         fprintf(output, "    mov %s, %d\n", regToText(to), imm);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (to <= EDI) {
+            buf.append_byte(0xb8 | to);
+            buf.append(imm);
+        } else {
+            throw_exception("MOV immediate supports only 32-bit registers");
+        }
     }
 
     virtual int getSize() {
@@ -129,8 +173,13 @@ public:
         fprintf(output, "    mov %s, %s\n", regToText(to), regToText(from));
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (to <= EDI && from <= EDI) {
+            buf.append_byte(0x89); // MOV opcode
+            buf.append_byte(0b11000000 | (from << 3) | (to)); // MODE: REG, FROM, TO
+        } else {
+            throw_exception("Non-32-bit register to register mov is not yet supported");
+        }
     }
 
     virtual int getSize() {
@@ -150,8 +199,15 @@ public:
         fprintf(output, "    mov [%s%+d], %s\n", regToText(rmreg), offset, regToText(from));
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (from <= EDI) {
+            buf.append_byte(0x89); // MOV opcode
+            buf.append_byte(0b01000000 | (from << 3) | rmreg); // REG+OFF8 MODE, SRC, DST
+        } else if (from >= AL) {
+            buf.append_byte(0x88); // MOV opcode
+            buf.append_byte(0b01000000 | ((from - AL) << 3) | rmreg); // REG+OFF8 MODE, SRC, DST
+        }
+        buf.append(offset);
     }
 
     virtual int getSize() {
@@ -171,8 +227,11 @@ public:
         fprintf(output, "    mov byte [%s%+d], %d\n", regToText(rmreg), offset, imm);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        buf.append_byte(0xc6); // Opcode
+        buf.append_byte(0b01000000 | rmreg);
+        buf.append(offset);
+        buf.append(imm);
     }
 
     virtual int getSize() {
@@ -192,8 +251,15 @@ public:
         fprintf(output, "    mov [%s%+d], %s\n", regToText(rmreg), offset, regToText(from));
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (from <= EDI) {
+            buf.append_byte(0x89); // MOV opcode
+            buf.append_byte(0b10000000 | (from << 3) | rmreg); // REG+OFF32 MODE, SRC, DST
+        } else if (from >= AL) {
+            buf.append_byte(0x88); // MOV opcode
+            buf.append_byte(0b10000000 | ((from - AL) << 3) | rmreg); // REG+OFF32 MODE, SRC, DST
+        }
+        buf.append(offset);
     }
 
     virtual int getSize() {
@@ -213,8 +279,15 @@ public:
         fprintf(output, "    mov %s, [%s%+d]\n", regToText(to), regToText(rmreg), offset);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (to <= EDI) {
+            buf.append_byte(0x8b); // MOV opcode
+            buf.append_byte(0b01000000 | (to << 3) | rmreg); // REG+OFF8 MODE, SRC, DST
+        } else if (to >= AL) {
+            buf.append_byte(0x8a); // MOV opcode
+            buf.append_byte(0b01000000 | ((to - AL) << 3) | rmreg); // REG+OFF8 MODE, SRC, DST
+        }
+        buf.append(offset);
     }
 
     virtual int getSize() {
@@ -234,8 +307,15 @@ public:
         fprintf(output, "    mov %s, [%s%+d]\n", regToText(to), regToText(rmreg), offset);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (to <= EDI) {
+            buf.append_byte(0x8b); // MOV opcode
+            buf.append_byte(0b01000000 | (to << 3) | rmreg); // REG+OFF8 MODE, SRC, DST
+        } else if (to >= AL) {
+            buf.append_byte(0x8a); // MOV opcode
+            buf.append_byte(0b01000000 | ((to - AL) << 3) | rmreg); // REG+OFF8 MODE, SRC, DST
+        }
+        buf.append(offset);
     }
 
     virtual int getSize() {
@@ -262,8 +342,9 @@ public:
         fprintf(output, "    call listing%d\n", listingId);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        buf.append_byte(0xe8); // CALL instruction opcode
+        buf.append(offset); // Relative shift
     }
 
     virtual int getSize() {
@@ -279,8 +360,8 @@ public:
         fprintf(output, "    ret\n");
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        buf.append_byte(0xc3); // Ret instruction bytecode
     }
 
     virtual int getSize() {
@@ -298,8 +379,9 @@ public:
         fprintf(output, "    ret %d\n", to_pop);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        buf.append_byte(0xc2); // RET imm instrunction bytecode
+        buf.append(to_pop); // Amount of bytes to pop
     }
 
     virtual int getSize() {
@@ -311,6 +393,13 @@ class Jump : public Operation {
 protected:
     int offset;
     int labelId;
+
+    void JccBytecode(Bytecode &buf, unsigned char cc) {
+        buf.append_byte(0x0F);
+        buf.append(cc);
+        buf.append(labelId);
+    }
+
 public:
     explicit Jump(int labelId) : labelId(labelId) {}
 
@@ -335,8 +424,9 @@ public:
         fprintf(output, "    jmp .label%d\n", labelId);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        buf.append_byte(0xe9); // Relative jump opcode
+        buf.append(offset); // Jump offset
     }
 
     virtual int getSize() {
@@ -352,8 +442,8 @@ public:
         fprintf(output, "    jg .label%d\n", labelId);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        JccBytecode(buf, 0x8f);
     }
 };
 
@@ -365,8 +455,8 @@ public:
         fprintf(output, "    jge .label%d\n", labelId);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        JccBytecode(buf, 0x8d);
     }
 };
 
@@ -378,8 +468,8 @@ public:
         fprintf(output, "    jl .label%d\n", labelId);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        JccBytecode(buf, 0x8c);
     }
 };
 
@@ -391,8 +481,8 @@ public:
         fprintf(output, "    jle .label%d\n", labelId);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        JccBytecode(buf, 0x8e);
     }
 };
 
@@ -404,8 +494,8 @@ public:
         fprintf(output, "    je .label%d\n", labelId);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        JccBytecode(buf, 0x84);
     }
 };
 
@@ -417,8 +507,8 @@ public:
         fprintf(output, "    jne .label%d\n", labelId);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        JccBytecode(buf, 0x85);
     }
 };
 
@@ -432,7 +522,7 @@ public:
         fprintf(output, "    ; %s\n", msg);
     }
 
-    virtual void toBytecode(Bytecode buf) {}
+    virtual void toBytecode(Bytecode &buf) {}
 
     virtual int getSize() {
         return 0;
@@ -449,8 +539,12 @@ public:
         fprintf(output, "    inc %s\n", regToText(reg));
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (reg <= EDI) {
+            buf.append_byte(0x40 | reg);
+        } else {
+            throw_exception("Increment of non-32-bit registers is not yet supported");
+        }
     }
 
     virtual int getSize() {
@@ -469,8 +563,14 @@ public:
         fprintf(output, "    inc [%s%+d]\n", regToText(reg), offset);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (reg <= EDI) {
+            buf.append_byte(0xff);
+            buf.append_byte(0b01000000 | reg);
+            buf.append(offset);
+        } else {
+            throw_exception("Increment addresed by non-32-bit register is not yet supported");
+        }
     }
 
     virtual int getSize() {
@@ -489,8 +589,14 @@ public:
         fprintf(output, "    inc [%s%+d]\n", regToText(reg), offset);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (reg <= EDI) {
+            buf.append_byte(0xff);
+            buf.append_byte(0b10000000 | reg);
+            buf.append(offset);
+        } else {
+            throw_exception("Increment addresed by non-32-bit register is not yet supported");
+        }
     }
 
     virtual int getSize() {
@@ -508,8 +614,12 @@ public:
         fprintf(output, "    dec %s\n", regToText(reg));
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (reg <= EDI) {
+            buf.append_byte(0x48 | reg);
+        } else {
+            throw_exception("Increment of non-32-bit registers is not yet supported");
+        }
     }
 
     virtual int getSize() {
@@ -528,8 +638,14 @@ public:
         fprintf(output, "    dec [%s%+d]\n", regToText(reg), offset);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (reg <= EDI) {
+            buf.append_byte(0xff);
+            buf.append_byte(0b01001000 | reg);
+            buf.append(offset);
+        } else {
+            throw_exception("Decrement addresed by non-32-bit register is not yet supported");
+        }
     }
 
     virtual int getSize() {
@@ -548,8 +664,14 @@ public:
         fprintf(output, "    dec [%s%+d]\n", regToText(reg), offset);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (reg <= EDI) {
+            buf.append_byte(0xff);
+            buf.append_byte(0b10001000 | reg);
+            buf.append(offset);
+        } else {
+            throw_exception("Increment addresed by non-32-bit register is not yet supported");
+        }
     }
 
     virtual int getSize() {
@@ -567,8 +689,13 @@ public:
         fprintf(output, "    idiv %s\n", regToText(divisor));
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (divisor <= EDI) {
+            buf.append_byte(0x7f);
+            buf.append_byte(0b11111000 | divisor);
+        } else {
+            throw_exception("Non-32 bit IDIV is not yet supported");
+        }
     }
 
     virtual int getSize() {
@@ -586,8 +713,13 @@ public:
         fprintf(output, "    imul %s\n", regToText(multiplier));
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (multiplier <= EDI) {
+            buf.append_byte(0x7f);
+            buf.append_byte(0b11101000 | multiplier);
+        } else {
+            throw_exception("Non-32 bit IMUL is not yet supported");
+        }
     }
 
     virtual int getSize() {
@@ -606,8 +738,13 @@ public:
         fprintf(output, "    add %s, %s\n", regToText(to), regToText(what));
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (to <= EDI && what <= EDI) {
+            buf.append_byte(0x01);
+            buf.append(0b11000000 | (what << 3) | to);
+        } else {
+            throw_exception("Non-32-bit exceptions are not yet supported");
+        }
     }
 
     virtual int getSize() {
@@ -626,8 +763,14 @@ public:
         fprintf(output, "    add %s, %d\n", regToText(to), value);
     };
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (to <= EDI) {
+            buf.append_byte(0x81);
+            buf.append_byte(0b11000000 | to);
+            buf.append(value);
+        } else {
+            throw_exception("Addition to non-32-bit registers is not supported");
+        }
     }
 
     virtual int getSize() {
@@ -647,8 +790,15 @@ public:
         fprintf(output, "    add [%s%+d], %d\n", regToText(ptr), offset, value);
     };
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if(ptr <= EDI) {
+            buf.append_byte(0x81);
+            buf.append_byte(0x01000000 | ptr);
+            buf.append(offset);
+            buf.append(value);
+        } else {
+            throw_exception("Non-32-bit register adressing is not supported");
+        }
     }
 
     virtual int getSize() {
@@ -668,8 +818,15 @@ public:
         fprintf(output, "    add [%s%+d], %d\n", regToText(ptr), offset, value);
     };
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if(ptr <= EDI) {
+            buf.append_byte(0x81);
+            buf.append_byte(0x10000000 | ptr);
+            buf.append(offset);
+            buf.append(value);
+        } else {
+            throw_exception("Non-32-bit register adressing is not supported");
+        }
     }
 
     virtual int getSize() {
@@ -687,8 +844,12 @@ public:
         fprintf(output, "    pop %s\n", regToText(reg));
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if(reg <= EDI) {
+            buf.append_byte(0x58 | reg);
+        } else {
+            throw_exception("Popping non-32-bit register is not yet supported");
+        }
     }
 
     virtual int getSize() {
@@ -706,8 +867,12 @@ public:
         fprintf(output, "    push %s\n", regToText(reg));
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if(reg <= EDI) {
+            buf.append_byte(0x50 | reg);
+        } else {
+            throw_exception("Pushing non-32-bit register is not yet supported");
+        }
     }
 
     virtual int getSize() {
@@ -726,8 +891,13 @@ public:
         fprintf(output, "    sub %s, %s\n", regToText(to), regToText(what));
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (to <= EDI && what <= EDI) {
+            buf.append_byte(0x29);
+            buf.append(0b11000000 | (what << 3) | to);
+        } else {
+            throw_exception("Non-32-bit exceptions are not yet supported");
+        }
     }
 
     virtual int getSize() {
@@ -746,8 +916,14 @@ public:
         fprintf(output, "    sub %s, %d\n", regToText(to), value);
     };
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (to <= EDI) {
+            buf.append_byte(0x81);
+            buf.append_byte(0b11101000 | to);
+            buf.append(value);
+        } else {
+            throw_exception("Addition to non-32-bit registers is not supported");
+        }
     }
 
     virtual int getSize() {
@@ -767,8 +943,15 @@ public:
         fprintf(output, "    sub [%s%+d], %d\n", regToText(ptr), offset, value);
     };
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if(ptr <= EDI) {
+            buf.append_byte(0x81);
+            buf.append_byte(0x01101000 | ptr);
+            buf.append(offset);
+            buf.append(value);
+        } else {
+            throw_exception("Non-32-bit register adressing is not supported");
+        }
     }
 
     virtual int getSize() {
@@ -788,8 +971,15 @@ public:
         fprintf(output, "    sub [%s%+d], %d\n", regToText(ptr), offset, value);
     };
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if(ptr <= EDI) {
+            buf.append_byte(0x81);
+            buf.append_byte(0x10101000 | ptr);
+            buf.append(offset);
+            buf.append(value);
+        } else {
+            throw_exception("Non-32-bit register adressing is not supported");
+        }
     }
 
     virtual int getSize() {
@@ -808,8 +998,13 @@ public:
         fprintf(output, "    cmp %s, %s\n", regToText(first), regToText(second));
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if(first <= EDI && second <= EDI) {
+            buf.append_byte(0x39);
+            buf.append_byte(0b11000000 | (second << 3) | first);
+        } else {
+            throw_exception("Can only compare 32-bit integers");
+        }
     }
 
     virtual int getSize() {
@@ -828,12 +1023,18 @@ public:
         fprintf(output, "    cmp %s, %d\n", regToText(first), second);
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if(first <= EDI) {
+            buf.append_byte(0x81);
+            buf.append_byte(0b11111000 | first);
+            buf.append(second);
+        } else {
+            throw_exception("Only 32-bit registers support comparison yet");
+        }
     }
 
     virtual int getSize() {
-        return 2;
+        return 6;
     }
 };
 
@@ -847,8 +1048,13 @@ public:
         fprintf(output, "    neg %s\n", regToText(what));
     }
 
-    virtual void toBytecode(Bytecode buf) {
-
+    virtual void toBytecode(Bytecode &buf) {
+        if (what <= EDI) {
+            buf.append_byte(0x7f);
+            buf.append_byte(0b11011000 | what);
+        } else {
+            throw_exception("Non-32 bit NEG is not yet supported");
+        }
     }
 
     virtual int getSize() {
@@ -867,7 +1073,7 @@ public:
         fprintf(output, "    and %s, %u\n", regToText(what), imm);
     }
 
-    virtual void toBytecode(Bytecode buf) {
+    virtual void toBytecode(Bytecode &buf) {
 
     }
 
@@ -883,11 +1089,11 @@ private:
 public:
     label(int num) : num(num) {}
 
-    virtual void toNASM(FILE* output) {
+    virtual void toNASM(FILE *output) {
         fprintf(output, ".label%d:\n", num);
     }
 
-    virtual void toBytecode(Bytecode buf) {}
+    virtual void toBytecode(Bytecode &buf) {}
 
     virtual int getSize() {
         return 0;
@@ -901,7 +1107,8 @@ private:
     vector<int> requiredListings;                                   // IDs of listings that are required for this one to function
     unsigned int pos;                                               // Current position of the end of the listing
 
-    void addOperation(Operation* op);
+    void addOperation(Operation *op);
+
 public:
     AssemblyListing();                                              // Default constructor
     AssemblyListing(AssemblyListing &&other) noexcept;              // Move constructor
@@ -951,6 +1158,7 @@ public:
     void call(int functionId);                                      // call functionId
 
     void idiv(REGISTER divisor);
+
     void imul(REGISTER multiplier);
 
     void inc(REGISTER what);                                        // inc register
@@ -982,7 +1190,8 @@ private:
     vector<AssemblyListing> listings;                               // Vector of assembly listings
     unsigned int main;                                              // Position of main listing
 
-    int *prepare();                                                 // Do required routines i. e. mark functions, place local and global offsets in jumps and calls
+    int *
+    prepare();                                                 // Do required routines i. e. mark functions, place local and global offsets in jumps and calls
 public:
     AssemblyProgram();                                              // Default constructor
     AssemblyProgram(AssemblyProgram &&other) noexcept;              // Move counstructor

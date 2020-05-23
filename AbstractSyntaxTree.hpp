@@ -116,7 +116,7 @@ public:
 void AbstractSyntaxNode::parseLocalVariables(int &alloc, int *offsets) {
     if (type == VAR) {
         alloc++;
-        offsets[id] = alloc * (-4);
+        offsets[right->id] = alloc * (-4);
     }
 
     if (right)
@@ -158,7 +158,9 @@ int AbstractSyntaxNode::pushVarlist(AssemblyListing &func, int *numbers, int *of
 
 void AbstractSyntaxNode::compileExpression(AssemblyListing &func, int *numbers, int *offsets) {
     if(type == CALL) {
+        func.comment("Pushing varlist START");
         int vars = right->pushVarlist(func, numbers, offsets);
+        func.comment("Pushing varlist END");
         func.call(numbers[left->id]);
         func.add(ESP, vars * 4);
         return;
@@ -312,8 +314,6 @@ void AbstractSyntaxNode::compileOperation(AssemblyListing &func, int *numbers, i
             func.ret();
             break;
 
-        default:
-            break;
     }
 
     if(left)
@@ -503,8 +503,8 @@ AbstractSyntaxNode::deserialize(const char *serialized, HashTable<CRC32CFunctor,
         if (type == ID) {
             if (ids.Get(identifier) == -1) {
                 string_ids.push_back(identifier);
-                ids.Insert(identifier, string_ids.getSize());
-                id = string_ids.getSize();
+                ids.Insert(identifier, string_ids.getSize() - 1);
+                id = string_ids.getSize() - 1;
             } else {
                 id = ids.Get(identifier);
                 delete identifier;

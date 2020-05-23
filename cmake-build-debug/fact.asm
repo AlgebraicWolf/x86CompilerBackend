@@ -82,13 +82,15 @@ listing2:
     mov EBP, ESP
     sub ESP, 4
     call listing0
-    mov [EBP+0], EAX
-    mov EAX, [EBP+0]
+    mov [EBP-4], EAX
+    ; Pushing varlist START
+    mov EAX, [EBP-4]
     push EAX
+    ; Pushing varlist END
     call listing3
     add ESP, 4
-    mov [EBP+0], EAX
-    mov EAX, [EBP+0]
+    mov [EBP-4], EAX
+    mov EAX, [EBP-4]
     call listing1
     mov ESP, EBP
     pop EBP
@@ -123,13 +125,15 @@ listing3:
     mov EAX, [EBP+8]
     pop EBX
     sub EAX, EBX
-    mov [EBP+0], EAX
-    mov EAX, [EBP+0]
+    mov [EBP-4], EAX
+    ; Pushing varlist START
+    mov EAX, [EBP-4]
     push EAX
+    ; Pushing varlist END
     call listing3
     add ESP, 4
-    mov [EBP+0], EAX
-    mov EAX, [EBP+0]
+    mov [EBP-4], EAX
+    mov EAX, [EBP-4]
     push EAX
     mov EAX, [EBP+8]
     pop EBX
