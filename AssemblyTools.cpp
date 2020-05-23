@@ -5,10 +5,10 @@
 #include "AssemblyTools.hpp"
 #include "utilities.hpp"
 
-#define CASE_REGNAME(X) case X: return #X
-
 const int ADDED = 1;
 const int PROCESSED = 2;
+
+#define CASE_REGNAME(X) case X: return #X
 
 constexpr const char *regToText(REGISTER reg) {
     switch (reg) {
@@ -24,6 +24,8 @@ constexpr const char *regToText(REGISTER reg) {
     }
     return "INVALID_REG";
 }
+
+#undef CASE_REGNAME
 
 void AssemblyListing::addOperation(Operation *op) {
     ops.push_back(op);
