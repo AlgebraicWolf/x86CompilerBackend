@@ -72,15 +72,15 @@ public:
     }
 
     void append(unsigned int dword) {
-        bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[3]);
-        bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[2]);
-        bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[1]);
         bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[0]);
+        bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[1]);
+        bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[2]);
+        bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[3]);
     }
 
     void append(unsigned short dword) {
-        bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[1]);
         bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[0]);
+        bytecode.push_back(reinterpret_cast<unsigned char *>(&dword)[1]);
     }
 
     void append(char byte) {
@@ -88,8 +88,22 @@ public:
     }
 
     void append(int dword) {
-        bytecode.push_back(*reinterpret_cast<unsigned int *>(&dword));
+        append(*reinterpret_cast<unsigned int *>(&dword));
     }
+
+    int getSize() {
+        return bytecode.getSize();
+    }
+
+    unsigned char *data() {
+        return bytecode.data();
+    }
+};
+
+enum OP_TYPE {
+    OTHER,
+    JUMP_OP,
+    CALL_OP
 };
 
 class Operation {
@@ -99,6 +113,9 @@ public:
     virtual void toNASM(FILE *output) = 0;                          // Translate instruction to NASM
     virtual void toBytecode(Bytecode &buf) = 0;                      // Translate instruction to bytecode
     virtual int getSize() = 0;                                      // Length of command in bytes
+    virtual OP_TYPE getType() {
+        return OTHER;
+    }
     virtual ~Operation() = default;
 };
 
@@ -207,10 +224,17 @@ public:
             buf.append_byte(0x88); // MOV opcode
             buf.append_byte(0b01000000 | ((from - AL) << 3) | rmreg); // REG+OFF8 MODE, SRC, DST
         }
+
+        if(rmreg == ESP)
+            buf.append_byte(0x24);
+
         buf.append(offset);
     }
 
     virtual int getSize() {
+        if(rmreg == ESP)
+            return 4;
+
         return 3;
     }
 };
@@ -230,11 +254,17 @@ public:
     virtual void toBytecode(Bytecode &buf) {
         buf.append_byte(0xc6); // Opcode
         buf.append_byte(0b01000000 | rmreg);
+        if(rmreg == ESP)
+            buf.append_byte(0x24);
+
         buf.append(offset);
         buf.append(imm);
     }
 
     virtual int getSize() {
+        if(rmreg == ESP)
+            return 5;
+
         return 4;
     }
 };
@@ -259,10 +289,18 @@ public:
             buf.append_byte(0x88); // MOV opcode
             buf.append_byte(0b10000000 | ((from - AL) << 3) | rmreg); // REG+OFF32 MODE, SRC, DST
         }
+
+        if(rmreg == ESP) {
+            buf.append_byte(0x24);
+        }
+
         buf.append(offset);
     }
 
     virtual int getSize() {
+        if(rmreg == ESP)
+            return 7;
+
         return 6;
     }
 };
@@ -287,10 +325,17 @@ public:
             buf.append_byte(0x8a); // MOV opcode
             buf.append_byte(0b01000000 | ((to - AL) << 3) | rmreg); // REG+OFF8 MODE, SRC, DST
         }
+
+        if(rmreg == ESP)
+            buf.append_byte(0x24);
+
         buf.append(offset);
     }
 
     virtual int getSize() {
+        if(rmreg == ESP)
+            return 4;
+
         return 3;
     }
 };
@@ -310,15 +355,20 @@ public:
     virtual void toBytecode(Bytecode &buf) {
         if (to <= EDI) {
             buf.append_byte(0x8b); // MOV opcode
-            buf.append_byte(0b01000000 | (to << 3) | rmreg); // REG+OFF8 MODE, SRC, DST
+            buf.append_byte(0b10000000 | (to << 3) | rmreg); // REG+OFF32 MODE, SRC, DST
         } else if (to >= AL) {
             buf.append_byte(0x8a); // MOV opcode
-            buf.append_byte(0b01000000 | ((to - AL) << 3) | rmreg); // REG+OFF8 MODE, SRC, DST
+            buf.append_byte(0b10000000 | ((to - AL) << 3) | rmreg); // REG+OFF32 MODE, SRC, DST
         }
+        if(rmreg == ESP)
+            buf.append_byte(0x24); // Damn intel why do you need SIB addressing mode?!
         buf.append(offset);
     }
 
     virtual int getSize() {
+        if(rmreg == ESP)
+            return 7;
+
         return 6;
     }
 };
@@ -345,6 +395,10 @@ public:
     virtual void toBytecode(Bytecode &buf) {
         buf.append_byte(0xe8); // CALL instruction opcode
         buf.append(offset); // Relative shift
+    }
+
+    virtual OP_TYPE getType() {
+        return CALL_OP;
     }
 
     virtual int getSize() {
@@ -397,7 +451,7 @@ protected:
     void JccBytecode(Bytecode &buf, unsigned char cc) {
         buf.append_byte(0x0F);
         buf.append(cc);
-        buf.append(labelId);
+        buf.append(offset);
     }
 
 public:
@@ -413,6 +467,10 @@ public:
 
     virtual int getSize() {
         return 6;
+    }
+
+    virtual OP_TYPE getType() {
+        return JUMP_OP;
     }
 };
 
@@ -567,6 +625,9 @@ public:
         if (reg <= EDI) {
             buf.append_byte(0xff);
             buf.append_byte(0b01000000 | reg);
+            if(reg == ESP) {
+                buf.append_byte(0x24);
+            }
             buf.append(offset);
         } else {
             throw_exception("Increment addresed by non-32-bit register is not yet supported");
@@ -574,7 +635,10 @@ public:
     }
 
     virtual int getSize() {
-        return 4;
+        if(reg == ESP)
+            return 4;
+
+        return 3;
     }
 };
 
@@ -600,6 +664,7 @@ public:
     }
 
     virtual int getSize() {
+
         return 7;
     }
 };
@@ -691,7 +756,7 @@ public:
 
     virtual void toBytecode(Bytecode &buf) {
         if (divisor <= EDI) {
-            buf.append_byte(0x7f);
+            buf.append_byte(0xf7);
             buf.append_byte(0b11111000 | divisor);
         } else {
             throw_exception("Non-32 bit IDIV is not yet supported");
@@ -715,7 +780,7 @@ public:
 
     virtual void toBytecode(Bytecode &buf) {
         if (multiplier <= EDI) {
-            buf.append_byte(0x7f);
+            buf.append_byte(0xf7);
             buf.append_byte(0b11101000 | multiplier);
         } else {
             throw_exception("Non-32 bit IMUL is not yet supported");
@@ -741,7 +806,7 @@ public:
     virtual void toBytecode(Bytecode &buf) {
         if (to <= EDI && what <= EDI) {
             buf.append_byte(0x01);
-            buf.append(0b11000000 | (what << 3) | to);
+            buf.append_byte(0b11000000 | (what << 3) | to);
         } else {
             throw_exception("Non-32-bit exceptions are not yet supported");
         }
@@ -794,6 +859,9 @@ public:
         if(ptr <= EDI) {
             buf.append_byte(0x81);
             buf.append_byte(0x01000000 | ptr);
+            if(ptr == ESP)
+                buf.append_byte(0x24);
+
             buf.append(offset);
             buf.append(value);
         } else {
@@ -802,6 +870,9 @@ public:
     }
 
     virtual int getSize() {
+        if(ptr == ESP)
+            return 8;
+
         return 7;
     }
 };
@@ -822,6 +893,9 @@ public:
         if(ptr <= EDI) {
             buf.append_byte(0x81);
             buf.append_byte(0x10000000 | ptr);
+            if(ptr == ESP) {
+                buf.append_byte(0x24);
+            }
             buf.append(offset);
             buf.append(value);
         } else {
@@ -830,6 +904,9 @@ public:
     }
 
     virtual int getSize() {
+        if(ptr == ESP)
+            return 11;
+
         return 10;
     }
 };
@@ -894,7 +971,7 @@ public:
     virtual void toBytecode(Bytecode &buf) {
         if (to <= EDI && what <= EDI) {
             buf.append_byte(0x29);
-            buf.append(0b11000000 | (what << 3) | to);
+            buf.append_byte(0b11000000 | (what << 3) | to);
         } else {
             throw_exception("Non-32-bit exceptions are not yet supported");
         }
@@ -947,6 +1024,11 @@ public:
         if(ptr <= EDI) {
             buf.append_byte(0x81);
             buf.append_byte(0x01101000 | ptr);
+
+            if(ptr == ESP) {
+                buf.append_byte(0x24);
+            }
+
             buf.append(offset);
             buf.append(value);
         } else {
@@ -955,6 +1037,9 @@ public:
     }
 
     virtual int getSize() {
+        if(ptr == ESP)
+            return 8;
+
         return 7;
     }
 };
@@ -975,6 +1060,10 @@ public:
         if(ptr <= EDI) {
             buf.append_byte(0x81);
             buf.append_byte(0x10101000 | ptr);
+
+            if(ptr == ESP)
+                buf.append_byte(0x24);
+
             buf.append(offset);
             buf.append(value);
         } else {
@@ -983,6 +1072,9 @@ public:
     }
 
     virtual int getSize() {
+        if(ptr == ESP)
+            return 11;
+
         return 10;
     }
 };
@@ -1050,7 +1142,7 @@ public:
 
     virtual void toBytecode(Bytecode &buf) {
         if (what <= EDI) {
-            buf.append_byte(0x7f);
+            buf.append_byte(0xf7);
             buf.append_byte(0b11011000 | what);
         } else {
             throw_exception("Non-32 bit NEG is not yet supported");
@@ -1102,8 +1194,49 @@ public:
 
 class AssemblyListing {
 private:
+    struct ELFHeader {
+        static constexpr unsigned char EI_MAG[4] = {'.', 'E', 'L', 'F'}; // File signature
+        unsigned char EI_CLASS; // Object file class
+        unsigned char EI_DATA; // Little Endian or Big Endian
+        unsigned char EI_VERSION; // ELF Header Version
+        unsigned char EI_OSABI; // OS-specific ABI
+        unsigned char EI_ABIVERSION; // Version of ABI
+        unsigned char EI_PAD0; // Reserved
+        unsigned char EI_PAD1; // Reserved
+        unsigned char EI_PAD2; // Reserved
+        unsigned char EI_PAD3; // Reserved
+        unsigned char EI_PAD4; // Reserved
+        unsigned char EI_PAD5; // Reserved
+        unsigned char EI_PAD6; // Reserved
+        unsigned char EI_PAD7; // Reserved
+        unsigned short e_type; // File type
+        unsigned short e_machine; // Architecture
+        unsigned int e_version; // Format version
+        unsigned int e_entry; // Entry point
+        unsigned int e_phoff; // Program headers offset
+        unsigned int e_shoff; // Section headers offset
+        unsigned int e_flags; // Processor flags
+        unsigned short e_ehsize; // ELF Header size
+        unsigned short e_phentsize; // Single program header size
+        unsigned short e_phnum; // Program header number
+        unsigned short e_shentsize; // Section header size
+        unsigned short e_shnum; // Number of section heders
+        unsigned short e_shstrndx; // Index of record describing section names table
+    };
+
+    struct ELFProgramHeader {
+        unsigned int p_type; // Segment type
+        unsigned int p_offset; // Segment offset relative to the beginning of the file
+        unsigned int p_vaddr; // Virtual address of segment in memory
+        unsigned int p_paddr; // Physical address of segment in memory
+        unsigned int p_filesz; // Size of segment in file. Could be zero
+        unsigned int p_memsz; // Size of segment in memort. Could be zero
+        unsigned int p_flags; // Segment flags
+        unsigned int p_align; // Segment alignment
+    };
+
     vector<Operation *> ops;                                        // Vector of operations i. e. part of the program
-    vector<unsigned int> labels;                                    // Positions of local labels relative to the beginning of the listing
+    vector<int> labels;                                             // Positions of local labels relative to the beginning of the listing
     vector<int> requiredListings;                                   // IDs of listings that are required for this one to function
     unsigned int pos;                                               // Current position of the end of the listing
 
@@ -1119,10 +1252,11 @@ public:
 
     bool markRequiredFunctions(int *listingPositions);              // Mark unmarked functions for compilation
     int getSize();                                                  // Return size of listing
-    void placeCallOffsets(const int *listingPositions);             // Place offsets in call functions
+    int placeCallOffsets(const int *listingPositions, int pos);     // Place offsets in call functions
     void placeLocalLabelJumpOffsets();                              // Place offsets in local label jumps
 
     void toNASM(FILE *output);                                      // Translate listing into NASM file
+    void toBytecode(Bytecode &buf);                                 // Translate listing into bytecode
 
     void interrupt(unsigned char int_num);                          // interrupt
 
@@ -1206,7 +1340,7 @@ public:
     void setMainListing(int pos);                                   // Set listing for main function
 
     void toNASM(char *filename);                                    // Translate program to Netwide Assembly
-    void toBytecode(char *filename);                                // Translate program to plain bytecode
+    Bytecode toBytecode();                                          // Translate program to plain bytecode
     void toELF(char *filename);                                     // Generate ELF file
 };
 

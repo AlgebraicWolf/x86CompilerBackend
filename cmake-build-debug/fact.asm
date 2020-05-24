@@ -83,10 +83,8 @@ listing2:
     sub ESP, 4
     call listing0
     mov [EBP-4], EAX
-    ; Pushing varlist START
     mov EAX, [EBP-4]
     push EAX
-    ; Pushing varlist END
     call listing3
     add ESP, 4
     mov [EBP-4], EAX
@@ -126,10 +124,8 @@ listing3:
     pop EBX
     sub EAX, EBX
     mov [EBP-4], EAX
-    ; Pushing varlist START
     mov EAX, [EBP-4]
     push EAX
-    ; Pushing varlist END
     call listing3
     add ESP, 4
     mov [EBP-4], EAX

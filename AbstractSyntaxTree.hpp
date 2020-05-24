@@ -398,6 +398,7 @@ AssemblyListing AbstractSyntaxTree::getInputFunction() {
     input.mov(EDI, 10); // Base
 
     input.sub(ESP, 4); // Allocate four bytes bcause I am lazy
+    input.mov(ESP, 0, ESI); // Clear everything
 
     input.mov(EBX, 0); // STDIN descriptor
     input.mov(ECX, ESP); // Buffer address

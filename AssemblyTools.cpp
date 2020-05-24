@@ -299,7 +299,7 @@ int *AssemblyProgram::prepare() {
 
     for (int i = 0; i < listings.getSize(); i++) {
         if (listingPositions[i]) {
-//            listings[i].placeLocalLabelJumpOffsets();   // Better to relocate to AssemblyListing::toNASM, though it is not required for translation to nasm tbh
+            listings[i].placeLocalLabelJumpOffsets();
             listingPositions[i] = pos;
             pos += listings[i].getSize();
         } else {
@@ -307,11 +307,75 @@ int *AssemblyProgram::prepare() {
         }
     }
 
+    pos = 0;
     for (int i = 0; i < listings.getSize(); i++) {
-//        listings[i].placeCallOffsets(listingPositions);
+        pos = listings[i].placeCallOffsets(listingPositions, pos);
     }
 
     return listingPositions;
+}
+
+void AssemblyListing::placeLocalLabelJumpOffsets() {
+    int pos = 0;
+    for (int i = 0; i < ops.getSize(); i++) {
+        pos += ops[i]->getSize();
+        if (ops[i]->getType() == JUMP_OP) {
+            Jump *op_jump = reinterpret_cast<Jump *>(ops[i]);
+            op_jump->setOffset(labels[op_jump->getLabelId()] - pos);
+        }
+    }
+}
+
+int AssemblyListing::placeCallOffsets(const int *listingPositions, int pos) {
+    for(int i = 0; i < ops.getSize(); i++) {
+        pos += ops[i]->getSize();
+        if(ops[i]->getType() == CALL_OP) {
+            auto *op_call = reinterpret_cast<class call *>(ops[i]);
+            op_call->setOffset(listingPositions[op_call->getListingId()] - pos);
+        }
+    }
+    return pos;
+}
+
+Bytecode AssemblyProgram::toBytecode() {
+    Bytecode buf; // Buffer for program
+
+    int *listingPositions = prepare();
+
+    // call main_listing
+    buf.append_byte(0xe8);
+    buf.append(static_cast<unsigned int>(listingPositions[main] + 9));
+
+    // mov eax, 1
+    buf.append_byte(0xb8);
+    buf.append(static_cast<unsigned int>(1));
+
+    // xor ebx, ebx
+    buf.append_byte(0x31);
+    buf.append_byte(0xdb);
+
+    // int 80h
+    buf.append_byte(0xcd);
+    buf.append_byte(0x80);
+
+    for (int i = 0; i < listings.getSize(); i++) {
+        if (listingPositions[i] != -1) {
+            listings[i].toBytecode(buf);
+        }
+    }
+
+    delete[] listingPositions;
+    return buf;
+}
+
+void AssemblyListing::toBytecode(Bytecode &buf) {
+    for (int i = 0; i < ops.getSize(); i++) {
+        ops[i]->toBytecode(buf);
+    }
+}
+
+void AssemblyProgram::toELF(char *filename) {
+    Bytecode executable = toBytecode(); // Translate executable into bytecode
 }
 
 void AssemblyProgram::toNASM(char *filename) {

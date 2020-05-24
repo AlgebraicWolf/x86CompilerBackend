@@ -1,1 +1,1 @@
-/usr/bin/g++  -g   CMakeFiles/x86CompilerBackend.dir/main.cpp.o  -o x86CompilerBackend  libUtilities.a libAssemblyTools.a 
+/usr/bin/g++   -m32 -g   CMakeFiles/x86CompilerBackend.dir/main.cpp.o  -o x86CompilerBackend  libUtilities.a libAssemblyTools.a 
