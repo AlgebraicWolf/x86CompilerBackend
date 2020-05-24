@@ -1194,47 +1194,6 @@ public:
 
 class AssemblyListing {
 private:
-    struct ELFHeader {
-        static constexpr unsigned char EI_MAG[4] = {'.', 'E', 'L', 'F'}; // File signature
-        unsigned char EI_CLASS; // Object file class
-        unsigned char EI_DATA; // Little Endian or Big Endian
-        unsigned char EI_VERSION; // ELF Header Version
-        unsigned char EI_OSABI; // OS-specific ABI
-        unsigned char EI_ABIVERSION; // Version of ABI
-        unsigned char EI_PAD0; // Reserved
-        unsigned char EI_PAD1; // Reserved
-        unsigned char EI_PAD2; // Reserved
-        unsigned char EI_PAD3; // Reserved
-        unsigned char EI_PAD4; // Reserved
-        unsigned char EI_PAD5; // Reserved
-        unsigned char EI_PAD6; // Reserved
-        unsigned char EI_PAD7; // Reserved
-        unsigned short e_type; // File type
-        unsigned short e_machine; // Architecture
-        unsigned int e_version; // Format version
-        unsigned int e_entry; // Entry point
-        unsigned int e_phoff; // Program headers offset
-        unsigned int e_shoff; // Section headers offset
-        unsigned int e_flags; // Processor flags
-        unsigned short e_ehsize; // ELF Header size
-        unsigned short e_phentsize; // Single program header size
-        unsigned short e_phnum; // Program header number
-        unsigned short e_shentsize; // Section header size
-        unsigned short e_shnum; // Number of section heders
-        unsigned short e_shstrndx; // Index of record describing section names table
-    };
-
-    struct ELFProgramHeader {
-        unsigned int p_type; // Segment type
-        unsigned int p_offset; // Segment offset relative to the beginning of the file
-        unsigned int p_vaddr; // Virtual address of segment in memory
-        unsigned int p_paddr; // Physical address of segment in memory
-        unsigned int p_filesz; // Size of segment in file. Could be zero
-        unsigned int p_memsz; // Size of segment in memort. Could be zero
-        unsigned int p_flags; // Segment flags
-        unsigned int p_align; // Segment alignment
-    };
-
     vector<Operation *> ops;                                        // Vector of operations i. e. part of the program
     vector<int> labels;                                             // Positions of local labels relative to the beginning of the listing
     vector<int> requiredListings;                                   // IDs of listings that are required for this one to function
@@ -1321,6 +1280,46 @@ public:
 
 class AssemblyProgram {
 private:
+    struct ELFHeader {
+        unsigned char EI_MAG[4]; // File signature
+        unsigned char EI_CLASS; // Object file class
+        unsigned char EI_DATA; // Little Endian or Big Endian
+        unsigned char EI_VERSION; // ELF Header Version
+        unsigned char EI_OSABI; // OS-specific ABI
+        unsigned char EI_ABIVERSION; // Version of ABI
+        unsigned char EI_PAD0; // Reserved
+        unsigned char EI_PAD1; // Reserved
+        unsigned char EI_PAD2; // Reserved
+        unsigned char EI_PAD3; // Reserved
+        unsigned char EI_PAD4; // Reserved
+        unsigned char EI_PAD5; // Reserved
+        unsigned char EI_PAD6; // Reserved
+        unsigned short e_type; // File type
+        unsigned short e_machine; // Architecture
+        unsigned int e_version; // Format version
+        unsigned int e_entry; // Entry point
+        unsigned int e_phoff; // Program headers offset
+        unsigned int e_shoff; // Section headers offset
+        unsigned int e_flags; // Processor flags
+        unsigned short e_ehsize; // ELF Header size
+        unsigned short e_phentsize; // Single program header size
+        unsigned short e_phnum; // Program header number
+        unsigned short e_shentsize; // Section header size
+        unsigned short e_shnum; // Number of section heders
+        unsigned short e_shstrndx; // Index of record describing section names table
+    };
+
+    struct ELFProgramHeader {
+        unsigned int p_type; // Segment type
+        unsigned int p_offset; // Segment offset relative to the beginning of the file
+        unsigned int p_vaddr; // Virtual address of segment in memory
+        unsigned int p_paddr; // Physical address of segment in memory
+        unsigned int p_filesz; // Size of segment in file. Could be zero
+        unsigned int p_memsz; // Size of segment in memort. Could be zero
+        unsigned int p_flags; // Segment flags
+        unsigned int p_align; // Segment alignment
+    };
+
     vector<AssemblyListing> listings;                               // Vector of assembly listings
     unsigned int main;                                              // Position of main listing
 

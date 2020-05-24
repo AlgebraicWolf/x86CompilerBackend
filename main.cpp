@@ -1,59 +1,63 @@
 #include <iostream>
 #include <exception>
-#include <sys/mman.h>
+#include <getopt.h>
 
 #include "utilities.hpp"
 #include "AbstractSyntaxTree.hpp"
 #include "AssemblyTools.hpp"
 
-#include <limits.h>
-#ifndef PAGESIZE
-#define PAGESIZE 4096
-#endif
 
-int main() {
+void parseArgs(int argc, char *argv[], bool &toNasm, char *&input, char *&output);
+
+int main(int argc, char *argv[]) {
+    char *input = nullptr;
+    char *output = nullptr;
+    bool toNasm = false;
+
+    parseArgs(argc, argv, toNasm, input, output);
+
+    if(!input) {
+        printf("\nInput file is not specified\n");
+        return 0;
+    }
+
+    if(!output) {
+        output = "output";
+    }
+
     AbstractSyntaxTree prog;
-    prog.load("input.ast");
+    prog.load(input);
 
-    AssemblyProgram compiled = prog.compile();
-    Bytecode bcode = compiled.toBytecode();
+    AssemblyProgram compiled = prog.compile(); // Compile program
 
-    unsigned char *data = bcode.data();
+    if(toNasm) {
+        compiled.toNASM(output);
+    } else {
+        compiled.toELF(output);
+    }
 
-    size_t new_size = ((bcode.getSize() - 1) / PAGESIZE + 1) * PAGESIZE;
-
-    unsigned char *newBuf = reinterpret_cast<unsigned char *>(aligned_alloc(PAGESIZE, new_size));
-
-    memcpy(newBuf, data, bcode.getSize());
-
-    mprotect(newBuf, new_size, PROT_EXEC);
-    int res = errno;
-
-    asm volatile(".intel_syntax noprefix;"
-        "nop;"
-        "nop;"
-        "nop;"
-        "nop;"
-        "nop;"
-        "nop;"
-        "nop;"
-        "nop;"
-        "nop;"
-        "nop;"
-        "nop;"
-        "nop;"
-        "nop;"
-        "nop;"
-        "nop;"
-        "nop;"
-        ".att_syntax prefix;");
-
-    (*reinterpret_cast<void (*)()>(newBuf))();
-
-
-
-    FILE *out = fopen("test.bin", "wb");
-    fwrite(bcode.data(), sizeof(unsigned char), bcode.getSize(), out);
-    fclose(out);
     return 0;
+}
+
+void parseArgs(int argc, char *argv[], bool &toNasm, char *&input, char *&output) {
+    int res = 0;
+    while ((res = getopt(argc, argv, "i:o:n")) != -1) {
+        switch (res) {
+            case 'i':
+                input = optarg;
+                break;
+
+            case 'o':
+                output = optarg;
+                break;
+
+            case 'n':
+                toNasm = true;
+                break;
+
+            case '?':
+                printf("\nInvalid argument: %c\n", res);
+                exit(0);
+        }
+    }
 }

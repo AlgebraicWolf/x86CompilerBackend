@@ -376,6 +376,71 @@ void AssemblyListing::toBytecode(Bytecode &buf) {
 
 void AssemblyProgram::toELF(char *filename) {
     Bytecode executable = toBytecode(); // Translate executable into bytecode
+    unsigned int executableSize = executable.getSize();
+
+
+    ELFHeader header = {
+            .EI_MAG = {0x7f, 'E', 'L', 'F'}, // Signature
+            .EI_CLASS = 1, // 32 bit executable
+            .EI_DATA = 1, // Little endian
+            .EI_VERSION = 1, // Current version
+            .EI_OSABI = 0, // UNIX System V ABI
+            .EI_ABIVERSION = 0, // ABI version 0
+            .EI_PAD0 = 0, // Reserved
+            .EI_PAD1 = 0, // Reserved
+            .EI_PAD2 = 0, // Reserved
+            .EI_PAD3 = 0, // Reserved
+            .EI_PAD4 = 0, // Reserved
+            .EI_PAD5 = 0, // Reserved
+            .EI_PAD6 = 0, // Reserved
+            .e_type = 2, // Executable file
+            .e_machine = 3, // Intel 80386
+            .e_version = 1, // Format vesion: current
+            .e_entry = 0x08048074, // Entry point
+            .e_phoff = 52, // Header Table is located right after this header
+            .e_shoff = 0, // I don't really head section headers tbh
+            .e_flags = 0, // Don't need any flags
+            .e_ehsize = 52, // ELF Header size for 32-bit file
+            .e_phentsize = 32, // Program Header size for 32-bit file
+            .e_phnum = 2, // Number of program headers
+            .e_shentsize = 40, // Size of section header
+            .e_shnum = 0, // No section headers
+            .e_shstrndx = 0 // No names
+
+    };
+
+    ELFProgramHeader headers[2] = {};
+    headers[0] = {
+            .p_type = 1, // Load to memory
+            .p_offset = 0, // From the beginning of file
+            .p_vaddr = 0x08048000, // Virtual address
+            .p_paddr = 0x08048000, // Physical address
+            .p_filesz = 0x74, // Size in file
+            .p_memsz = 0x74, // Size in memory. Exactly ELF file and two headers
+            .p_flags = 4, // Readable
+            .p_align = 0x10 // Align by 16 bytes border
+    };
+    headers[1] = {
+            .p_type = 1, // Load
+            .p_offset = 0x80, // Right after all the headers
+            .p_vaddr = 0x8048080, // Virtual address
+            .p_paddr = 0x8048080, // Physical address
+            .p_filesz = executableSize, // Size is equal to the size of program
+            .p_memsz = executableSize, // Size in memory is the same
+            .p_flags = 1 | 4, // Executable and readable,
+            .p_align = 0x10 // Align by 16 bytes
+    };
+
+    FILE *output = fopen(filename, "wb");
+
+    if(!output)
+        throw_exception("Unable to open the file for writing");
+
+    fwrite(&header, sizeof(ELFHeader), 1, output);
+    fwrite(headers, sizeof(ELFProgramHeader), 2, output);
+    fwrite(executable.data(), sizeof(unsigned char), executable.getSize(), output);
+    fclose(output);
+
 }
 
 void AssemblyProgram::toNASM(char *filename) {
