@@ -41,7 +41,7 @@ iostream
 -
 exception
 -
-sys/mman.h
+getopt.h
 -
 utilities.hpp
 /home/alexey/Programming/x86CompilerBackend/utilities.hpp
@@ -49,8 +49,6 @@ AbstractSyntaxTree.hpp
 /home/alexey/Programming/x86CompilerBackend/AbstractSyntaxTree.hpp
 AssemblyTools.hpp
 /home/alexey/Programming/x86CompilerBackend/AssemblyTools.hpp
-limits.h
--
 
 /home/alexey/Programming/x86CompilerBackend/utilities.hpp
 exception
