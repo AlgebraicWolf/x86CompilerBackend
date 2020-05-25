@@ -1338,9 +1338,9 @@ public:
 
     void setMainListing(int pos);                                   // Set listing for main function
 
-    void toNASM(char *filename);                                    // Translate program to Netwide Assembly
+    void toNASM(const char *filename);                              // Translate program to Netwide Assembly
     Bytecode toBytecode();                                          // Translate program to plain bytecode
-    void toELF(char *filename);                                     // Generate ELF file
+    void toELF(const char *filename);                               // Generate ELF file
 };
 
 #endif //X86COMPILERBACKEND_ASSEMBLYTOOLS_HPP

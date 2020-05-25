@@ -28,6 +28,9 @@ constexpr const char *regToText(REGISTER reg) {
 #undef CASE_REGNAME
 
 void AssemblyListing::addOperation(Operation *op) {
+    if(!op)
+        throw_exception("Invlid pointer to operation");
+
     ops.push_back(op);
     pos += op->getSize();
 }
@@ -240,12 +243,18 @@ int AssemblyListing::getSize() {
 }
 
 void AssemblyListing::toNASM(FILE *output) {
+    if(!output)
+        throw_exception("Invalid pointer to output file");
+
     for (int i = 0; i < ops.getSize(); i++) {
         ops[i]->toNASM(output);
     }
 }
 
 bool AssemblyListing::markRequiredFunctions(int *listingPositions) {
+    if(!listingPositions)
+        throw_exception("Invalid pointer to listingPositions");
+
     bool updated = false;
 
     for (int i = 0; i < requiredListings.getSize(); i++) {
@@ -327,6 +336,9 @@ void AssemblyListing::placeLocalLabelJumpOffsets() {
 }
 
 int AssemblyListing::placeCallOffsets(const int *listingPositions, int pos) {
+    if(!listingPositions)
+        throw_exception("Invalid pointer to listingPositions");
+
     for(int i = 0; i < ops.getSize(); i++) {
         pos += ops[i]->getSize();
         if(ops[i]->getType() == CALL_OP) {
@@ -374,7 +386,10 @@ void AssemblyListing::toBytecode(Bytecode &buf) {
     }
 }
 
-void AssemblyProgram::toELF(char *filename) {
+void AssemblyProgram::toELF(const char *filename) {
+    if(!filename)
+        throw_exception("Invalid pointer to file name");
+
     Bytecode executable = toBytecode(); // Translate executable into bytecode
     unsigned int executableSize = executable.getSize();
 
@@ -443,7 +458,10 @@ void AssemblyProgram::toELF(char *filename) {
 
 }
 
-void AssemblyProgram::toNASM(char *filename) {
+void AssemblyProgram::toNASM(const char *filename) {
+    if(!filename)
+        throw_exception("Invalid pointer to file name");
+
     FILE *output = fopen(filename, "w");
 
     if (!output)

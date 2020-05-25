@@ -114,6 +114,9 @@ public:
 };
 
 void AbstractSyntaxNode::parseLocalVariables(int &alloc, int *offsets) {
+    if(!offsets)
+        throw_exception("Invalid pointer to offsets provided");
+
     if (type == VAR) {
         alloc++;
         offsets[right->id] = alloc * (-4);
@@ -130,6 +133,9 @@ void AbstractSyntaxNode::parseArguments(int *offsets, int depth) {
     if (type != VARLIST)
         throw_exception("Parsing arguments in non-varlist node");
 
+    if(!offsets)
+        throw_exception("Invalid pointer to offsets provided");
+
     if (right) {
         depth++;
         offsets[right->id] = 4 * depth;
@@ -141,6 +147,9 @@ void AbstractSyntaxNode::parseArguments(int *offsets, int depth) {
 int AbstractSyntaxNode::pushVarlist(AssemblyListing &func, int *numbers, int *offsets) {
     if(type != VARLIST)
         throw_exception("Trying to push arguments in non-varlist node");
+
+    if(!offsets)
+        throw_exception("Invalid pointer to offsets provided");
 
     if(right) {
         int pushed = 0;
@@ -157,6 +166,12 @@ int AbstractSyntaxNode::pushVarlist(AssemblyListing &func, int *numbers, int *of
 }
 
 void AbstractSyntaxNode::compileExpression(AssemblyListing &func, int *numbers, int *offsets) {
+    if(!offsets)
+        throw_exception("Invalid pointer to offsets provided");
+
+    if(!numbers)
+        throw_exception("Invalid pointer to listing numbers provided");
+
     if(type == CALL) {
         func.comment("Pushing varlist START");
         int vars = right->pushVarlist(func, numbers, offsets);
@@ -218,6 +233,12 @@ void AbstractSyntaxNode::compileExpression(AssemblyListing &func, int *numbers, 
 
 
 void AbstractSyntaxNode::compileOperation(AssemblyListing &func, int *numbers, int *offsets) {
+    if(!offsets)
+        throw_exception("Invalid pointer to offsets provided");
+
+    if(!numbers)
+        throw_exception("Invalid pointer to listing numbers provided");
+
     if(type != OP)
         throw_exception("Trying to compile non-operation node as operation one");
 
@@ -321,6 +342,9 @@ void AbstractSyntaxNode::compileOperation(AssemblyListing &func, int *numbers, i
 }
 
 AssemblyListing AbstractSyntaxNode::compileFunction(int *numbers, int idsSize) {
+    if(!numbers)
+        throw_exception("Invalid pointer to listing numbers provided");
+
     if (type != DEF)
         throw_exception("Function compilation started from non-function node");
 
@@ -578,8 +602,6 @@ AbstractSyntaxNode::~AbstractSyntaxNode() {
             parent->left = nullptr;
         } else if (this == parent->right) {
             parent->right = nullptr;
-        } else {
-            throw_exception("During node destruction, orphan node was detected");
         }
     }
 
@@ -681,55 +703,31 @@ NODE_TYPE AbstractSyntaxNode::getType(const char *serialized) {
     if (!serialized)
         throw_exception("Invalid string pointer is provided to getType function");
 
-    if (strcmp(serialized, "DECLARATION") == 0) {
-        return D;
-    } else if (strcmp(serialized, "IF") == 0) {
-        return IF;
-    } else if (strcmp(serialized, "WHILE") == 0) {
-        return WHILE;
-    } else if (strcmp(serialized, "FUNCTION") == 0) {
-        return DEF;
-    } else if (strcmp(serialized, "VARLIST") == 0) {
-        return VARLIST;
-    } else if (strcmp(serialized, "OP") == 0) {
-        return OP;
-    } else if (strcmp(serialized, "ASSIGN") == 0) {
-        return ASSIGN;
-    } else if (strcmp(serialized, "RETURN") == 0) {
-        return RETURN;
-    } else if (strcmp(serialized, "INITIALIZE") == 0) {
-        return VAR;
-    } else if (strcmp(serialized, "CALL") == 0) {
-        return CALL;
-    } else if (strcmp(serialized, "INPUT") == 0) {
-        return INPUT;
-    } else if (strcmp(serialized, "OUTPUT") == 0) {
-        return OUTPUT;
-    } else if (strcmp(serialized, "PROGRAM_ROOT") == 0) {
-        return P;
-    } else if (strcmp(serialized, "C") == 0) {
-        return C;
-    } else if (strcmp(serialized, "BLOCK") == 0) {
-        return B;
-    } else if (strcmp(serialized, "ADD") == 0) {
-        return ADD;
-    } else if (strcmp(serialized, "SUB") == 0) {
-        return SUB;
-    } else if (strcmp(serialized, "MUL") == 0) {
-        return MUL;
-    } else if (strcmp(serialized, "DIV") == 0) {
-        return DIV;
-    } else if (strcmp(serialized, "BELOW") == 0) {
-        return BELOW;
-    } else if (strcmp(serialized, "ABOVE") == 0) {
-        return ABOVE;
-    } else if (strcmp(serialized, "EQUAL") == 0) {
-        return EQUAL;
-    } else if (strcmp(serialized, "SQR") == 0) {
-        return SQRT;
-    } else {
-        return ID;
-    }
+    if      (strcmp(serialized, "DECLARATION" ) == 0) return D;
+    else if (strcmp(serialized, "IF"          ) == 0) return IF;
+    else if (strcmp(serialized, "WHILE"       ) == 0) return WHILE;
+    else if (strcmp(serialized, "FUNCTION"    ) == 0) return DEF;
+    else if (strcmp(serialized, "VARLIST"     ) == 0) return VARLIST;
+    else if (strcmp(serialized, "OP"          ) == 0) return OP;
+    else if (strcmp(serialized, "ASSIGN"      ) == 0) return ASSIGN;
+    else if (strcmp(serialized, "RETURN"      ) == 0) return RETURN;
+    else if (strcmp(serialized, "INITIALIZE"  ) == 0) return VAR;
+    else if (strcmp(serialized, "CALL"        ) == 0) return CALL;
+    else if (strcmp(serialized, "INPUT"       ) == 0) return INPUT;
+    else if (strcmp(serialized, "OUTPUT"      ) == 0) return OUTPUT;
+    else if (strcmp(serialized, "PROGRAM_ROOT") == 0) return P;
+    else if (strcmp(serialized, "C"           ) == 0) return C;
+    else if (strcmp(serialized, "BLOCK"       ) == 0) return B;
+    else if (strcmp(serialized, "ADD"         ) == 0) return ADD;
+    else if (strcmp(serialized, "SUB"         ) == 0) return SUB;
+    else if (strcmp(serialized, "MUL"         ) == 0) return MUL;
+    else if (strcmp(serialized, "DIV"         ) == 0) return DIV;
+    else if (strcmp(serialized, "BELOW"       ) == 0) return BELOW;
+    else if (strcmp(serialized, "ABOVE"       ) == 0) return ABOVE;
+    else if (strcmp(serialized, "EQUAL"       ) == 0) return EQUAL;
+    else if (strcmp(serialized, "SQR"         ) == 0) return SQRT;
+    else                                              return ID;
+
 }
 
 AbstractSyntaxTree::AbstractSyntaxTree() : IDs(), string_ids(), root(nullptr) {}
@@ -787,7 +785,14 @@ void AbstractSyntaxTree::load(const char *filename) {
 }
 
 void AbstractSyntaxTree::dump(const char *filename) {
+    if(!filename)
+        throw_exception("Invalid pointer to file name");
+
     FILE *dumpFile = fopen(filename, "w");
+
+    if(!dumpFile)
+        throw_exception("Unable to open file for dumping");
+
     fprintf(dumpFile, "digraph {\n");
 
     if (root)
@@ -798,6 +803,9 @@ void AbstractSyntaxTree::dump(const char *filename) {
 }
 
 void AbstractSyntaxNode::dump(FILE *out) {
+    if(!out)
+        throw_exception("Invalid pointer to output file");
+
     fprintf(out, "node%p[shape=record, label=\"{TYPE: %s | id: %d | {<l> left | <r> right}}\"];\n", this,
             serializeType(), id);
 

@@ -9,9 +9,9 @@
 
 void parseArgs(int argc, char *argv[], bool &toNasm, char *&input, char *&output);
 
-int main(int argc, char *argv[]) {
-    char *input = nullptr;
-    char *output = nullptr;
+int main(const int argc, char *argv[]) {
+    const char *input = nullptr;
+    const char *output = nullptr;
     bool toNasm = false;
 
     parseArgs(argc, argv, toNasm, input, output);
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void parseArgs(int argc, char *argv[], bool &toNasm, char *&input, char *&output) {
+void parseArgs(const int argc, char *argv[], bool &toNasm, const char *&input, const char *&output) {
     int res = 0;
     while ((res = getopt(argc, argv, "i:o:n")) != -1) {
         switch (res) {

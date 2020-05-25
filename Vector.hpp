@@ -35,6 +35,8 @@ public:
 template<typename T>
 vector<T>::vector(size_t capacity) : capacity(capacity), size(0) {
     elems = new T[capacity];
+    if(!elems)
+        throw_exception("Unable to allocate memory");
 }
 
 template<typename T>
@@ -68,6 +70,10 @@ void vector<T>::reserve(size_t newSize) {
         return;
 
     T* newElems = new T[newSize];
+
+    if(!newElems)
+        throw_exception("Unable to allocate memory for reservation");
+
     for (int i = 0; i < size; i++) {
         new(newElems + i) T(std::move(elems[i]));
     }
